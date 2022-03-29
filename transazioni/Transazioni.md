@@ -66,6 +66,18 @@
 
 **ME9L:** Output messaggi ( Schedulazione accordi / piano di consegna testata)
 
+**ME51N / ME52N / ME53N** Creazione RDA / Modifica RDA / Visualizzazione RDA
+
+**ME54N:** Rilascio singolo
+
+**ME55:** Rilascio collettivo
+
+**ME57:** Elaborare e attribuire RDA a fornitore
+
+**ME58:** Converte le RDA in ODA
+
+**ME5A:** Lista RDA
+
 **MELB:** Requirement tracking number
 
 **MM01 / MM02 / MM03:** Anagrafica materiale
