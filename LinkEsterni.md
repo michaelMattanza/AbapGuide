@@ -35,7 +35,10 @@
   
 - OData
   - https://blogs.sap.com/2016/05/02/step-by-step-gateway-odata-service-creation-using-segw-method-1-importing-ddic-structure/
-    
+
+- Popup
+  - https://sap4tech.net/abap-popup-types-and-samples-codes/
+     
 - Process order / Production order
   - https://archive.sap.com/discussions/thread/923748
   - https://help.sap.com/doc/saphelp_sbo900/9.0/it-IT/44/f29329df7365fbe10000000a1553f7/content.htm?no_cache=true (ita)
