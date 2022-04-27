@@ -24,6 +24,19 @@ E' una macchina o un gruppo di macchine dove vengono effettuate le operazioni. I
 - Capacity
 - Costing
 
+
+**Distinta Base**    
+Insieme dei componenti necessari per la realizzazione di un codice materiale. Viene definito a livello di divisione e impiego. Possono esistere anche le distinte alternative.
+
+**Ciclo di lavoro**    
+Fasi di lavorazione che servono per ottenere un determinato articolo. Viene codificato a livello di materiale e divisione. In creazione può essere limitato ad una determinata fase ( utilizzo ) mentre lo stato indica se è stato solo approvato o rilasciato ( generale o per ambito determinato 0.) Ogni fase viene del ciclo viene identificata con un numero univoco, e abbinata un centro di lavoro da cui eredita i tempi di lavorazione ( macchina/uomo ). Ogni fase ha bisogno di una chiave di controllo ( 'YBP1' valore std ) che pilota una serie di valori.
+In ogni fase è possibile definire la qtà base necessaria per un componente con eventuali valori di conversione di udm.
+Esistono anche fasi qualitative dove vengono indicate le caratteristiche valorizzate di una fase.
+A ogni fase può essere associata una qtà minima, se un'ordine di produzione non raggiunge questa qtà, la fase non sarà utilizzabile.
+
+**Versione di produzione**    
+Possono esserci n varianti di distinte base e cicli di lavoro ad esse collegati. Per distinguere a sistema quale combinazione viene coinvolta si utilizza la versione di produzione ( obbligatoria da S/4 ). Viene creata basandosi su divisione/cod. materiale. Ogni combinazione materiale/divisione/versione prd ha associato una distinta e un ciclo associato.
+
 *Routing*</br>
 Sequenza di azioni eeguite in un work center ( schedulazioni ). Vengono specificati anche i tempi per la lavorazione. 
 </br></br>
