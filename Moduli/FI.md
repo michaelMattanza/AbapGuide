@@ -1,4 +1,5 @@
-<h1>Modulo FI</h1>
+<h1>Modulo FI</h1>    
+Il modulo FI ( contabilità finanziaria ) serve per gestire la contabilità relativa a pagamenti, record contabili in entrata e uscita, il patrimonio e conti bancari. Spesso si collega al modulo CO ( contabilità ). Lo scopo di questi moduli è registrare ogni transazione finanziaria.
 
 **BTE**   
 Le BTE (Business Transaction Event) sono delle tecniche di enhancement sviluppate per il modulo FI. Le BTE sfruttano delle interfaccie 
