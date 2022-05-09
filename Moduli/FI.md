@@ -1,6 +1,12 @@
 <h1>Modulo FI</h1>    
-Il modulo FI ( contabilità finanziaria ) serve per gestire la contabilità relativa a pagamenti, record contabili in entrata e uscita, il patrimonio e conti bancari. Spesso si collega al modulo CO ( contabilità ). Lo scopo di questi moduli è registrare ogni transazione finanziaria.
+Il modulo FI ( contabilità finanziaria ) serve per gestire la contabilità relativa a pagamenti, record contabili in entrata e uscita, il patrimonio e conti bancari. Spesso si collega al modulo CO ( contabilità ). Lo scopo di questi moduli è registrare ogni transazione finanziaria in un determinato periodo.
 
+**Piano dei conti**    
+Il piano dei conti riporta i rendiconti della parte gestionale e finanziaria. I record presenti in questo piano dei conti possono essere di credito o debito. 
+
+**Azienda**    
+E’ l’unità organizzativa per la quale i rendiconti finanziari possono essere redatti secondo il diritto commerciale pertinente. Un’azienda può comprendere più codici aziendali. 
+ 
 **BTE**   
 Le BTE (Business Transaction Event) sono delle tecniche di enhancement sviluppate per il modulo FI. Le BTE sfruttano delle interfaccie 
 create dagli sviluppatori collegate ad un codice evento nelle tabelle di configurazione. Vengono utilizzate per esigenze di business 
