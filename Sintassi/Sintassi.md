@@ -173,7 +173,7 @@ SELECT SINGLE campo1, campo2
 ```
 
 **NB**    
-*SELECT SINGLE* estrae da database il primo record che corrisponde alle condizioni definite nella query mentre *SELECT UP TO 1 ROWS* estrae tutti i record che corrispondono alla condizione di where ma verrà mostrato solo il primo nel risultato finale.    
+*SELECT SINGLE* estrae da database il primo record che corrisponde alle condizioni definite nella query mentre *SELECT UP TO 1 ROWS* estrae tutti i record che corrispondono alla condizione di where ma verrà mostrato solo il primo nel risultato finale. Il secondo caso però, prima di restituire il risultato, svolge operazioni di aggregazione e raggruppamento, per restituire il risultato che più si addice alle condizioni di ricerca; viene consigliata infatti per le estrazioni senza una chiave primaria completa.
 
 **Select count:** contare le righe di una select
 ```abap
