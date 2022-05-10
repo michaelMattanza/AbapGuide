@@ -172,6 +172,9 @@ SELECT SINGLE campo1, campo2
   WHERE condizione.
 ```
 
+**NB**    
+*SELECT SINGLE* estrae da database il primo record che corrisponde alle condizioni definite nella query mentre *SELECT UP TO 1 ROWS* estrae tutti i record che corrispondono alla condizione di where ma verrà mostrato solo il primo nel risultato finale.    
+
 **Select count:** contare le righe di una select
 ```abap
 SELECT COUNT(*) 
