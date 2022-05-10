@@ -26,6 +26,9 @@
 - Dynamic Code
   - https://itpsap.com/abap-dynamic-programming-part-5/
 
+- Exit
+  - https://blogs.sap.com/2014/04/19/methods-to-find-customeruser-exits-badis-for-a-transaction-code/
+
 - Goods movements
   - https://wiki.scn.sap.com/wiki/display/ERPSCM/Goods+Movements+with+BAPI#:~:text=There%20are%20two%20BAPIs%20for,only%20for%20reverting%20Goods%20Movements)
   
