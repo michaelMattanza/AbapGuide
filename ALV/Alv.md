@@ -17,6 +17,13 @@ Se l'alv ha campi editabili è possibile intercettare le modifiche con il metodo
 **PBO**</br>
 In questo modulo è possibile nascondere o mostrare i vari elementi contenuti nella dynpro. E' infatti possibile ciclare sui vari elementi tramite il <i>LOOP AT SCREEN</i> e vedere il nome (o il gruppo) dell'elemento stampato (questo riguarda solo gli elementi creati tramite layout della dynpro, non coinvolge cose nell'alv).
 
+Per sapere lo stato della dynpro si deve controllare il campo aktyp:
+- Se A: visualizzazione
+- Se H: creazione
+- Se V: Modifica
+
+Per sapere se una transazione è in lettura/scrittura/modifica leggere dalla tabella T180.
+
  ### FieldCatalog
  Il field catalog è la tabella che contiene le proprietà dei dati che verranno stampati tramite la ALV. In questo caso il field catalog viene creato dinamicamente, utilizzando il descrittore di tabelle. Siccome prende i testi dei dati dalla tabella dd04t è possibile che non tutti i campi vengano valorizzati (oppure con la presenza di più campi dello stesso tipo). In quel caso sono da inserire a mano. 
  
