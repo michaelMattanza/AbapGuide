@@ -1,5 +1,6 @@
 <h1>BAPI_OBJCL_GETDETAIL</h1>
-Estrarre il valore di una caratteristica di una classificazione definita
+Estrarre il valore di una caratteristica di una classificazione definita    
+
 ``` abap
 *"*"Local Interface:
 *"  IMPORTING
