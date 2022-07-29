@@ -1,18 +1,18 @@
 <h1>SD_SELECT_SALES_DOCUMENTS</h1>
 Estrazione ordini di vendita e piani di consegna aperti
 
-Il lancio della funzione va fatta una prima volta per gli ordini di vendita con: 
-iv_trvog = ‘0’; 
-iv_vboff = ‘X’; 
-i_vkorg_rt = IT01; 
-i_werks_rt = IT01; 
-i_auart_rt = ---. 
-Va fatto un secondo lancio per i piani di consegna: 
-iv_trvog = ‘3’; 
-i_vkorg_rt = IT01; 
-i_werks_rt = IT01;
-i_auart_rt = ---;
-iv_vboff = ‘X’; da verificare.
+Il lancio della funzione va fatta una prima volta per gli ordini di vendita con:    
+iv_trvog = ‘0’;    
+iv_vboff = ‘X’;    
+i_vkorg_rt = IT01;    
+i_werks_rt = IT01;     
+i_auart_rt = ---.     
+Va fatto un secondo lancio per i piani di consegna:     
+iv_trvog = ‘3’;     
+i_vkorg_rt = IT01;       
+i_werks_rt = IT01;    
+i_auart_rt = ---;    
+iv_vboff = ‘X’; da verificare.    
 
 
 ```abap 
