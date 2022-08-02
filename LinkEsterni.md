@@ -67,6 +67,7 @@
   
 - Search help
   - https://blogs.sap.com/2014/12/18/assign-search-help-to-standard-structure/
+  - https://sapcodes.com/2015/11/22/controllingrestricting-select-options-features/
 
 - Sintassi base
   - https://blogs.sap.com/2015/10/25/abap-740-quick-reference/ 
