@@ -293,7 +293,7 @@ ENDMODULE.
 ``` abap    
 " Fieldcatalog Setting
 fieldname = 'zzfieldname'
-drdn_hndl = 'X'
+drdn_hndl = '1'
 drdn_alias = 'X'
 
 " Value Setting
