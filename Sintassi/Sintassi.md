@@ -158,6 +158,11 @@ WRITE / |{ lv_vbeln  ALPHA = OUT }|.     “or use ALPHA = IN to go in
 WRITE / |{ pa_date DATE = ISO }|.           “Date Format YYYY-MM-DD   
 WRITE / |{ pa_date DATE = User }|.          “As per user settings   
 WRITE / |{ pa_date DATE = Environment }|.   “Formatting setting of   
+
+" Conversione quantità    
+DATA(lv_qty) = 13.000.
+
+WRITE lv_menge TO lv_menge_char LEFT-JUSTIFIED UNIT lv_meinh. " se lv_meinh == udm senza decimali (es. pezzi ) -> lv_menge_char = 13
 ```
 <h1>Query</h1>
 
