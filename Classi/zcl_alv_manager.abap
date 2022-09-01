@@ -19,6 +19,8 @@ public section.
   data GV_PROGRAM_NAME type STRING .
   data GT_FCAT type LVC_T_FCAT .
   data GT_SECOND_FCAT type LVC_T_FCAT .
+  data gt_f4 TYPE lvc_t_f4.
+  data gt_second_f4 TYPE lvc_t_f4.
 
   methods CONSTRUCTOR
     importing
@@ -54,9 +56,34 @@ public section.
     importing
       value(IT_TABLE_FT) type DATA optional
       value(IT_TABLE_ST) type DATA optional .
+
+  METHODS set_register_fld_first_alv
+        IMPORTING
+        VALUE(it_f4) TYPE lvc_t_f4.
+
+  METHODS set_register_fld_second_alv
+        IMPORTING
+        VALUE(it_f4) TYPE lvc_t_f4.
+
+  methods SET_DROP_DOWN_TABLE_first_alv
+    importing
+      value(IT_DROP_DOWN) type LVC_T_DROP optional
+      value(IT_DROP_DOWN_ALIAS) type LVC_T_DRAL optional .
+
+   methods SET_DROP_DOWN_TABLE_second_alv
+    importing
+      value(IT_DROP_DOWN) type LVC_T_DROP optional
+      value(IT_DROP_DOWN_ALIAS) type LVC_T_DRAL optional .
+
   PROTECTED SECTION.
     DATA gref_outtab TYPE REF TO data .
     DATA gref_second_outtab TYPE REF TO data .
+
+    DATA at_ddown_first_alv TYPE LVC_T_DROP.
+    DATA at_ddown_second_alv TYPE LVC_T_DROP.
+
+    DATA at_ddown_alias_first_alv TYPE lvc_t_dral.
+    DATA at_ddown_alias_second_alv TYPE lvc_t_dral.
 
   PRIVATE SECTION.
     METHODS create_dyn_fc
@@ -82,6 +109,7 @@ public section.
         VALUE(ct_fieldcat)  TYPE lvc_t_fcat .
 
     METHODS set_handler_first_alv.
+
     METHODS set_handler_second_alv.
 
     " Handler Prima alv
@@ -108,7 +136,13 @@ public section.
       FOR EVENT double_click OF cl_gui_alv_grid
       IMPORTING
         !e_row
-        !e_column .
+        !e_column.
+
+     METHODS handle_on_f4
+            FOR EVENT onf4 OF cl_gui_alv_grid
+                IMPORTING e_fieldname
+                          es_row_no
+                          er_event_data.
 
     " Handler Seconda alv
     METHODS handle_toolbar_st
@@ -139,6 +173,12 @@ public section.
       IMPORTING
         !e_row
         !e_column .
+
+    METHODS handle_on_f4_st
+            FOR EVENT onf4 OF cl_gui_alv_grid
+                IMPORTING e_fieldname
+                          es_row_no
+                          er_event_data.
 
 
 ENDCLASS.
@@ -225,6 +265,10 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
           fieldname = <fs_detail>-name
           outputlen = COND #( WHEN lref_typedescr->type_kind EQ 'P' THEN lref_elemdescr->output_length ELSE lref_typedescr->length )
           decimals_o = lref_typedescr->decimals
+          inttype = <fs_detail>-type_kind
+          datatype = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN 'DATS' ELSE '' )
+*          intlen = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN '000008' ELSE '' )
+*          dd_outlen  = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN '000010' ELSE '' )
           col_opt = 'X'
         ) TO ct_fieldcat.
 
@@ -510,6 +554,19 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
       set_handler_first_alv( ).
       set_handler_second_alv( ).
 
+      go_alv->set_drop_down_table(
+        EXPORTING
+          it_drop_down       = at_ddown_first_alv
+          it_drop_down_alias = at_ddown_alias_first_alv
+      ).
+
+      go_second_alv->set_drop_down_table(
+        EXPORTING
+          it_drop_down       = at_ddown_second_alv
+          it_drop_down_alias = at_ddown_alias_second_alv
+      ).
+
+
       ASSIGN gref_outtab->* TO <fs_outtab>.
       ASSIGN gref_second_outtab->* TO <fs_second_outtab>.
 
@@ -539,6 +596,11 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
     ELSE.
       go_alv = NEW cl_gui_alv_grid( i_parent = cl_gui_container=>default_screen ).
       set_handler_first_alv( ).
+      go_alv->set_drop_down_table(
+        EXPORTING
+          it_drop_down       = at_ddown_first_alv
+          it_drop_down_alias = at_ddown_alias_first_alv
+      ).
 
       ASSIGN gref_outtab->* TO <fs_outtab>.
 
@@ -571,6 +633,17 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
     PERFORM handle_double_click IN PROGRAM (gv_program_name) IF FOUND USING e_row e_column.
   ENDMETHOD.
 
+  METHOD handle_on_f4.
+    PERFORM handle_on_f4 IN PROGRAM (gv_program_name) IF FOUND USING e_fieldname es_row_no er_event_data.
+  ENDMETHOD.
+
+  METHOD set_register_fld_first_alv.
+    APPEND LINES OF it_f4 TO gt_f4.
+  ENDMETHOD.
+
+  METHOD set_register_fld_second_alv.
+    APPEND LINES OF it_f4 TO gt_second_f4.
+  ENDMETHOD.
 
   METHOD handle_double_click_st.
     PERFORM handle_double_click_st IN PROGRAM (gv_program_name) IF FOUND USING e_row e_column.
@@ -596,6 +669,10 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
     PERFORM handle_user_command_st IN PROGRAM (gv_program_name) IF FOUND USING  e_ucomm lt_rows.
   ENDMETHOD.
 
+  METHOD handle_on_f4_st.
+    PERFORM handle_on_f4_st IN PROGRAM (gv_program_name) IF FOUND USING e_fieldname es_row_no er_event_data.
+  ENDMETHOD.
+
 
   METHOD set_handler_first_alv.
 
@@ -604,6 +681,13 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
     SET HANDLER me->handle_hotspot_click FOR go_alv.
     SET HANDLER me->handle_double_click FOR go_alv.
     SET HANDLER me->handle_data_changed FOR go_alv.
+
+    IF gt_f4 IS NOT INITIAL.
+        IF go_alv IS NOT INITIAL.
+            go_alv->register_f4_for_fields( it_f4 = gt_f4 ).
+        ENDIF.
+        SET HANDLER me->handle_on_f4        FOR go_alv.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -614,6 +698,12 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
     SET HANDLER me->handle_hotspot_click_st FOR go_second_alv.
     SET HANDLER me->handle_double_click_st FOR go_second_alv.
     SET HANDLER me->handle_data_changed_st FOR go_second_alv.
+    IF gt_f4 IS NOT INITIAL.
+        IF go_second_alv IS NOT INITIAL.
+            go_second_alv->register_f4_for_fields( it_f4 = gt_second_f4 ).
+        ENDIF.
+        SET HANDLER me->handle_on_f4_st       FOR go_second_alv.
+    ENDIF.
   ENDMETHOD.
 
 
@@ -635,4 +725,14 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
       ).
     ENDIF.
   endmethod.
+  METHOD SET_DROP_DOWN_TABLE_FIRST_ALV.
+    at_ddown_first_alv = CORRESPONDING #( BASE ( at_ddown_first_alv ) it_drop_down ).
+    at_ddown_alias_first_alv = CORRESPONDING #( BASE ( at_ddown_alias_first_alv ) it_drop_down_alias ).
+  ENDMETHOD.
+
+  METHOD SET_DROP_DOWN_TABLE_SECOND_ALV.
+    at_ddown_second_alv = CORRESPONDING #( BASE ( at_ddown_second_alv ) it_drop_down ).
+    at_ddown_alias_second_alv = CORRESPONDING #( BASE ( at_ddown_alias_second_alv ) it_drop_down_alias ).
+  ENDMETHOD.
+
 ENDCLASS.
