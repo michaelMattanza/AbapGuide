@@ -285,3 +285,35 @@ MODULE user_command_0100 INPUT.
   ENDCASE.
 ENDMODULE.
 ```
+
+
+<h1>Formato celle</h1>    
+### Dropdown values    
+
+``` abap    
+" Fieldcatalog Setting
+fieldname = 'zzfieldname'
+drdn_hndl = 'X'
+drdn_alias = 'X'
+
+" Value Setting
+ls_dropdown-handle = '1'.
+ls_dropdown-value = 'G'.
+APPEND ls_dropdown TO lt_dropdown.
+
+ls_dropdown-handle = '1'.
+ls_dropdown-value = 'H'.
+APPEND ls_dropdown TO lt_dropdown.
+
+ls_dropdown-handle = '1'.
+ls_dropdown-value = 'I'.
+APPEND ls_dropdown TO lt_dropdown.
+
+ls_dropdown-handle = '1'.
+ls_dropdown-value = 'M'.
+APPEND ls_dropdown TO lt_dropdown.
+
+CALL METHOD go_grid_ctrl->set_drop_down_table
+  EXPORTING
+    it_drop_down = lt_dropdown.
+``` 
