@@ -5,6 +5,8 @@ XXXXX va inserito un identificativo.
   
 Per la FM INPUT spostare il valore in -> out se non servono particolari modifiche al valore. 
 
+Per associare la conversione al dominio andare in SE11 ed inserire l'identificativo XXXXX nel campo "Conversion Routine"
+
 
 ```abap
 FUNCTION CONVERSION_EXIT_XXXXX_OUTPUT
