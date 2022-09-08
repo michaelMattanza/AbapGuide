@@ -1,5 +1,6 @@
 <h1>WFCS_FCAL_LUT_CREATE_S</h1>
-Date e tipologia ( lavorativo, feriale, ... ) con riferimento al calendario lavorativo comprese tra due date indicative
+Date e tipologia ( lavorativo, feriale, ... ) con riferimento al calendario lavorativo comprese tra due date indicative    
+
 ```abap
 *"*"Lokale Schnittstelle:
 *"  IMPORTING
