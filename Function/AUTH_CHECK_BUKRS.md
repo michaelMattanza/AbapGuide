@@ -1,4 +1,5 @@
 <h1>AUTH_CHECK_BUKRS</h1>   
+
 ```abap 
 *"*"Lokale Schnittstelle:
 *"  TABLES
