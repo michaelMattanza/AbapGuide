@@ -1,5 +1,6 @@
 <h1>GET_BDS_GRAPHIC_AS_BMP</h1>
 Function per ottenere immagini caricate con SE78
+
 ```abap
 CALL METHOD cl_ssf_xsf_utilities=>get_bds_graphic_as_bmp
       EXPORTING
