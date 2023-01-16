@@ -1,5 +1,7 @@
-<h1>CACS_GET_TABLE_FIELDS</h1>
+<h1>CACS_GET_TABLE_FIELDS</h1>     
 Ottnere i campi di una tabella distinti tra campi chiave e non chiave
+
+
 ``` abap
 *"*"Lokale Schnittstelle:
 *"       IMPORTING
