@@ -1,5 +1,7 @@
 <h1>CONVERSION_EXIT_ATINN_INPUT</h1>    
 Estrarre il numero interno di una caratteristica
+
+
 ``` abap
 *"*"Lokale Schnittstelle:
 *"       IMPORTING
