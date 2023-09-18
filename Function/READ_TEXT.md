@@ -1,6 +1,6 @@
 <h1>READ_TEXT</h1>     
 
-```abap
+```abap      
 *"*"Lokale Schnittstelle:
 *"  IMPORTING
 *"     VALUE(CLIENT) LIKE  SY-MANDT DEFAULT SY-MANDT
