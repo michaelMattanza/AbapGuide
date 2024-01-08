@@ -38,6 +38,9 @@
   
 - OData
   - https://blogs.sap.com/2016/05/02/step-by-step-gateway-odata-service-creation-using-segw-method-1-importing-ddic-structure/
+ 
+- OLE2      
+  - https://blogs.sap.com/2012/03/29/using-ole2-objects-for-create-an-excel-file/    
 
 - Popup
   - https://sap4tech.net/abap-popup-types-and-samples-codes/
