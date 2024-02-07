@@ -1,5 +1,7 @@
 **/IWFND/MAINT_SERVICE:** Attivare OData service (non serve SEGW se attivato da qui dopo aver creato la CDS)
 
+**/IWFND/ERROR_LOG** Attivare OData service (non serve SEGW se attivato da qui dopo aver creato la CDS)
+
 **/IWFND/GW_CLIENT:** Testare servizio OData
 
 **/N/UI2/FLP:** fiori launchpad
