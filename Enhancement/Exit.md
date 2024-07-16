@@ -8,3 +8,6 @@ Esistono vari tipi di exit ( tipo function, menu, screen, etc... ) attivabili tr
 
 SXX: S standard exits della sap. 
 UXX: U user exits definite dagli utenti
+
+Lista Exit:
+- EXIT_SAPLV56K_002 ( Exit Idoc DESADV - DELVRY07 )
