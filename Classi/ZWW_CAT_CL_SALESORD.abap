@@ -1,4 +1,5 @@
-```abap     
+```abap
+
 class ZWW_CAT_CL_SALESORD definition
   public
   final
@@ -165,4 +166,5 @@ CLASS ZWW_CAT_CL_SALESORD IMPLEMENTATION.
   ENDMETHOD.
 
 ENDCLASS.
+
 ```
