@@ -1,0 +1,8 @@
+# ENQUEUE_EVVBAKE
+Function per sbloccare Ordine di vendita
+
+```abap
+CALL FUNCTION 'DEQUEUE_EVVBAKE'
+    EXPORTING
+      vbeln = iv_vbeln.
+```
