@@ -369,7 +369,40 @@ DATA(lt_count_imp) = VALUE tty_imp(
      )
   ).
   ```
-  
+
+  **Ciclo con GROUP BY**    
+Questo ciclo permette di raggruppare in loop un determinato gruppo di valori secondo una chiave      
+
+GROUP SIZE - Number of rows in the internal table for the particular group key.     
+GROUP INDEX - Index of the group from Main loop iteration.     
+REFERENCE INTO DATA - Assiging the group data into a seperate internal table to access inside the LOOP GROUP.    
+ASCENDING / DESCENDING - sort the groups by the group key in ascending or descending order before the group loop is executed.      
+WITHOUT MEMBERS - constructs groups but there is not access to the rows of the groups in the group loop. If the addition WITHOUT MEMBERS is specified.     
+The addition WITHOUT MEMBERS is used to improve performance in all cases where the content of the groups is not required.
+LOOP AT GROUP. Group loop to access each row of the group.      
+Here is my sample code to understand LOOP AT with GROUP BY and some group features.      
+
+```abap
+TYPES ty_t_mard TYPE SORTED TABLE OF mard WITH UNIQUE KEY matnr werks lgort.
+DATA lt_mard TYPE ty_t_mard.
+
+
+SELECT * FROM mard INTO TABLE lt_mard.
+DATA : lv_stock TYPE mard-labst.
+
+LOOP AT lt_mard INTO DATA(wa_mard) GROUP BY ( matnr = wa_mard-matnr
+                                              size = GROUP SIZE )
+                                              REFERENCE INTO DATA(group1).
+  CLEAR : lv_stock.
+  WRITE : / group1->matnr , group1->size.
+
+  LOOP AT GROUP group1 ASSIGNING FIELD-SYMBOL(<mard>).
+    ADD <mard>-labst TO lv_stock.
+  ENDLOOP.
+  WRITE :/ 'Total:' ,  lv_stock.
+ENDLOOP.
+```
+
   **Contare righe secondo condizioni definite**
  ```abap
   DATA(lv_lines) = REDUCE i(
