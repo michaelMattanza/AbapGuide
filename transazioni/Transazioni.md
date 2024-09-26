@@ -102,6 +102,8 @@
 
 **SCOT:** Impostazioni mail
 
+**SCU3:** Impostazioni mail
+
 **SCR3:** Configurazione impresa
 
 **SCR20:** Attivazione configurazione impresa
