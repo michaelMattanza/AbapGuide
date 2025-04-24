@@ -540,6 +540,7 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
       go_alv = NEW cl_gui_alv_grid( i_parent = lo_first_container ).
       go_second_alv = NEW cl_gui_alv_grid( i_parent = lo_second_container ).
 
+      IF sy-batch EQ abap_false.
       set_handler_first_alv( ).
       set_handler_second_alv( ).
 
@@ -554,7 +555,7 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
           it_drop_down       = at_ddown_second_alv
           it_drop_down_alias = at_ddown_alias_second_alv
       ).
-
+      ENDIF.
 
       ASSIGN gref_outtab->* TO <fs_outtab>.
       ASSIGN gref_second_outtab->* TO <fs_second_outtab>.
@@ -584,13 +585,14 @@ CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
 
     ELSE.
       go_alv = NEW cl_gui_alv_grid( i_parent = cl_gui_container=>default_screen ).
+      IF sy-batch EQ abap_false.
       set_handler_first_alv( ).
       go_alv->set_drop_down_table(
         EXPORTING
           it_drop_down       = at_ddown_first_alv
           it_drop_down_alias = at_ddown_alias_first_alv
       ).
-
+      ENDIF.
       ASSIGN gref_outtab->* TO <fs_outtab>.
 
       go_alv->set_table_for_first_display(
