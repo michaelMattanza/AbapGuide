@@ -1,13 +1,14 @@
+```abap
+DATA:    
+  ls_vbak_wa         TYPE vbak. " Not strictly needed for WS_DELIVERY_UPDATE_2 directly but useful    
 DATA:
-  ls_vbak_wa         TYPE vbak. " Not strictly needed for WS_DELIVERY_UPDATE_2 directly but useful
-DATA:
-  ls_vbkok_wa        TYPE vbok_wa, " Header data for delivery update
-  lt_prot            TYPE TABLE OF prot. " Return messages/log
+  ls_vbkok_wa        TYPE vbok_wa, " Header data for delivery update      
+  lt_prot            TYPE TABLE OF prot. " Return messages/log      
 
 DATA:
-  lt_handling_units_1 TYPE TABLE OF wshun_t. " Table for HUs in WS_DELIVERY_UPDATE_2
+  lt_handling_units_1 TYPE TABLE OF wshun_t. " Table for HUs in WS_DELIVERY_UPDATE_2    
 DATA:
-  ls_handling_unit_1  TYPE wshun_t.
+  ls_handling_unit_1  TYPE wshun_t.    
 
 *&---------------------------------------------------------------------*
 *& Start of Selection
@@ -43,3 +44,4 @@ START-OF-SELECTION.
     TABLES
       it_handling_units_1 = lt_handling_units_1 " Table of Handling Units
       et_prot             = lt_prot.             " Return Messages/Log
+```
