@@ -1,6 +1,7 @@
 <h1>BAPI_MATERIAL_SAVEDATA</h1>
 
-```abap
+<pre>
+<code>
 " Aggiungi o sottrai N giorni con 0 < N < 365+, N mesi o anni
 
 *"*"Lokale Schnittstelle:
@@ -25,4 +26,5 @@ CALL FUNCTION 'HR_SEN_CALE_DAYS_DATE'
     CONVERSION_NOT_SPECIFIED = 1  "             
     CONVERSION_NOT_POSSIBLE = 2  "             
     .  "  HR_SEN_CALE_DAYS_DATE
-```
+</code>
+</pre>
