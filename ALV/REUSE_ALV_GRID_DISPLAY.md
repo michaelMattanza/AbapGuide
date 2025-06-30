@@ -1,6 +1,5 @@
 <h1>REUSE_ALV_GRID_DISPLAY</h1>    
-Questa function permette di creare un ALV. Può essere utilizzata come alternativa alla SALV e all'Alv OO.     
-Può essere utilizzata quando si vuole gestire in modo semplice la chiamata ad altri processi esterni che devono sovrascrivere la schermata attuale (es. chiamare un PDF form)
+This function allows you to create an ALV. It can be used as an alternative to SALV and ALV OO (Object-Oriented ALV). It's particularly useful when you need to simply manage calls to other external processes that should overwrite the current screen (e.g., calling a PDF form).
 
 ```abap
 DATA: lt_fcat TYPE slis_t_fieldcat_alv,
