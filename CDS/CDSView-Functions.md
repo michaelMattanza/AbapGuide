@@ -1,89 +1,89 @@
-<b>FUNCTION</b></br>
-Esistono delle functions che migliorano la qualità del codice. Possono essere <i>SQL Functions</i> o <i>Built-In Functions</i>.
+# FUNCTION
 
-- <i>SQL Functions</i></br>
-Sono funzioni basilari e non flessibili e ritornano un risultato logico o booleano. Questa categoria di funzioni può essere sottodivisa 
-in altre due categorie: numeriche e stringhe.
-  - <i>Numeriche</i>
+Functions exist to improve code quality. They can be *SQL Functions* or *Built-In Functions*.
 
-| Funzione                  | Definizione                               | Output                            |
-|---------------------------|-------------------------------------------|-----------------------------------|
-| ABS(arg)                  | Valore assoluto del numero del numero arg | Valore assoluto                   |
-| CEIL(arg)                 | Arrotondamento numero con la virgola      | Numero arrotondato per difetto    |
-| DIV(arg1, arg2)           | Divisione convenzionale (interi)          | Quoziente                         |
-| DIVISION(arg1, arg2, dec) | Divisione con decimali                    | Risultato arrotondato ai decimali |
-| MOD(arg1, arg2)           | Operazione modulo convenzionale           | Ottiene il resto della divisione  | 
-| FLOOR(arg)                | Arrotondamento numero con la virgola      | Numero arrotondato per eccesso    |
-| ROUND(arg, pos)           | Arrotondamento numero con decimali        | Numero arrotondato per decimale   |
+- *SQL Functions*
+These are basic and inflexible functions that return a logical or boolean result. This category of functions can be further subdivided into two other categories: numeric and string.
+  - *Numeric*
 
-  - <i>Stringhe</i>
-  
-| Funzione                           | Definizione                                                                  |
-|------------------------------------|------------------------------------------------------------------------------|
-| LENGHT(arg)                        | Lunghezza della stringa                                                      | 
-| INSTR(arg1, arg2)                  | Posizione di una stringa in un'altra                                         | 
-| CONCATENATE(arg1, arg2)            | Divisione convenzionale (interi)                                             | 
-| CONCATENATE WITH SPACE(arg1, arg2) | Divisione con decimali                                                       | 
-| LEFT(arg1, arg2)                   | Prende le prime n lettere di arg1                                            |  
-| LOWER(arg1)                        | Converte in minuscolo la stringa passata                                     |                       
-| LPAD(arg1, arg2, arg3)             | Aggiunge ad arg1 la stringa arg3 per arrivare alla lunghezza arg2 (a sinistra)|
-| RPAD(arg1, arg2, arg3)             | Aggiunge ad arg1 la stringa arg3 per arrivare alla lunghezza arg2 (a destra)  |
-| LTRIM(arg1, arg2)                  | Rimuove da arg1 la stringa indicata in arg2 (la prima a sinistra)             |
-| RTRIM(arg1, arg2)                  | Rimuove da arg1 la stringa indicata in arg2 (la prima a destra)               |
-| REPLACE(arg1, arg2, arg3)          | Sostituisce ad arg1 la stringa arg3 al posto della sottostringa arg2          |
-| SUBSTRING(arg1, arg2, arg3)        | Leggi nell'arg1 le n lettere (arg3) partendo dalla posizione arg3             |
-| UPPER(arg1)                        | Converti tutte le lettere in maiuscolo                                        |
- 
-- <i>Built-In Functions</i></br>
-  - <i>Unit Conversion Functions</i><br>
-   <b>Sintassi</b></br>
-    unit_conversion( quantity => brgew, 
-                   source_unit => meins, 
-                   target_unit => gewei 
-                   )</br>
-    <b>Regole</b></br>
-    Se non ci sono relazioni tra il source_unit e il target_unit ci sarà un dump.</br>
-    
-  - <i>Currency Conversion Functions</i><br>
-   <b>Sintassi</b></br>
-    currency_conversion( amount => a.price, 
-                   source_currency => a.currency, 
-                   target_currency => :p_to_curr,
-                   exchange_rate_date => :p_conv_date
-                   )</br>
-    <b>Regole</b></br>
-    Non ottiene dei risultati precisi.</br>
-    
-  - <i>Decimal Shift</i><br>
-   <b>Sintassi</b></br>
-     decimal_shift( amount => :p_amt, currency => a.currency )</br>
-    <b>Regole</b></br>
-    Esegue la conversione in base ai dati interni (tab TCURX) -> Approfondire.</br>
-    
-   - Date
-     - Add Days</br>
-     <b>Sintassi</b></br>
-     dats_add_days(a.fldate, :p_add_days  , 'INITIAL')</br>
-    <b>Regole</b></br>
-    Il primo parametro è la data, il secondo i giorni da aggiungere, il terzo è per la gestione dell'errore (INITIAL, FAIL, NULL, INITIAL, UNCHANGED)</br>
-    
-     - Add Month</br>
-     <b>Sintassi</b></br>
-     dats_add_months(a.fldate, :p_add_months, 'NULL')</br>
-     <b>Regole</b></br>
-     Come per i giorni il primo parametro è la data, il secondo i mesi da aggiungere, il terzo è la gestione dell'errore
-     
-     - Days between two dates</br>
-     <b>Sintassi</b></br>
-     dats_days_between (a.fldate, $parameters.p_curr_date )</br>
-     <b>Regole</b></br>
-     Il primo parametro è il primo giorno, il secondo è l'ultimo
-     
-     - Date validation</br>
-     <b>Sintassi</b></br>
-     dats_is_valid(a.fldate)</br>
-     <b>Regole</b></br>
-     Controlla se la data è valida (ritorna 1 o 0)
-     
-> NB<br>
-Alcune delle built-in functions contengono bug.
+| Function            | Definition                                  | Output                            |
+|---------------------|---------------------------------------------|-----------------------------------|
+| ABS(arg)            | Absolute value of the number arg            | Absolute value                    |
+| CEIL(arg)           | Rounding a decimal number up                | Number rounded up                 |
+| DIV(arg1, arg2)     | Conventional division (integers)            | Quotient                          |
+| DIVISION(arg1, arg2, dec) | Division with decimals                      | Result rounded to decimals        |
+| MOD(arg1, arg2)     | Conventional modulo operation               | Remainder of the division         |
+| FLOOR(arg)          | Rounding a decimal number down              | Number rounded down               |
+| ROUND(arg, pos)     | Rounding a number with decimals             | Number rounded by decimal         |
+
+  - *String*
+
+| Function                           | Definition                                                                        |
+|------------------------------------|-----------------------------------------------------------------------------------|
+| LENGTH(arg)                        | Length of the string                                                              |
+| INSTR(arg1, arg2)                  | Position of one string within another                                             |
+| CONCATENATE(arg1, arg2)            | Concatenates two strings                                                          |
+| CONCATENATE WITH SPACE(arg1, arg2) | Concatenates two strings with a space in between                                  |
+| LEFT(arg1, arg2)                   | Takes the first n characters of arg1                                              |
+| LOWER(arg1)                        | Converts the passed string to lowercase                                           |
+| LPAD(arg1, arg2, arg3)             | Pads arg1 with string arg3 on the left to reach length arg2                       |
+| RPAD(arg1, arg2, arg3)             | Pads arg1 with string arg3 on the right to reach length arg2                      |
+| LTRIM(arg1, arg2)                  | Removes the string indicated in arg2 from arg1 (the first from the left)          |
+| RTRIM(arg1, arg2)                  | Removes the string indicated in arg2 from arg1 (the first from the right)         |
+| REPLACE(arg1, arg2, arg3)          | Replaces substring arg2 in arg1 with string arg3                                  |
+| SUBSTRING(arg1, arg2, arg3)        | Reads n characters (arg3) from arg1 starting from position arg2                   |
+| UPPER(arg1)                        | Converts all letters in the passed string to uppercase                            |
+
+- *Built-In Functions*
+  - *Unit Conversion Functions*
+    **Syntax**
+    `unit_conversion( quantity => brgew,`
+    `                  source_unit => meins,`
+    `                  target_unit => gewei`
+    `                  )`
+    **Rules**
+    If there are no relationships between `source_unit` and `target_unit`, there will be a dump.
+
+  - *Currency Conversion Functions*
+    **Syntax**
+    `currency_conversion( amount => a.price,`
+    `                  source_currency => a.currency,`
+    `                  target_currency => :p_to_curr,`
+    `                  exchange_rate_date => :p_conv_date`
+    `                  )`
+    **Rules**
+    Does not yield precise results.
+
+  - *Decimal Shift*
+    **Syntax**
+    `decimal_shift( amount => :p_amt, currency => a.currency )`
+    **Rules**
+    Performs the conversion based on internal data (table TCURX) -> Needs further investigation.
+
+  - *Date Functions*
+    - *Add Days*
+    **Syntax**
+    `dats_add_days(a.fldate, :p_add_days , 'INITIAL')`
+    **Rules**
+    The first parameter is the date, the second is the days to add, the third is for error handling (INITIAL, FAIL, NULL, INITIAL, UNCHANGED).
+
+    - *Add Months*
+    **Syntax**
+    `dats_add_months(a.fldate, :p_add_months, 'NULL')`
+    **Rules**
+    Similar to days, the first parameter is the date, the second is the months to add, the third is for error handling.
+
+    - *Days between two dates*
+    **Syntax**
+    `dats_days_between (a.fldate, $parameters.p_curr_date )`
+    **Rules**
+    The first parameter is the start date, the second is the end date.
+
+    - *Date validation*
+    **Syntax**
+    `dats_is_valid(a.fldate)`
+    **Rules**
+    Checks if the date is valid (returns 1 or 0).
+
+> NB
+Some of the built-in functions contain bugs.
