@@ -1,6 +1,6 @@
 <h1>Salv</h1>
 
-La salv è una classe per stampare i dati a schermo ( simil alv ) con il vantaggio di essere veloce e performante a discapito di una limitata scelta di personalizzazione.
+The SALV is a class used for displaying data on screen (similar to ALV), offering the advantage of being fast and performant, but with limited customization options.
 
 ```abap
 DATA: lo_functions TYPE REF TO cl_salv_functions_list,
