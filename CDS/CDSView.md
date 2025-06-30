@@ -93,9 +93,6 @@ CDS views are parameterized, meaning they also accept input variables (CDS views
 
 </br>
 </br>
-</br>
-</br>
-
  - Note
     - <b>System access:</b> (privilege) for using certain functions
     - <b>Authorization Objects:</b> These are certain transactions that we can access or not.
