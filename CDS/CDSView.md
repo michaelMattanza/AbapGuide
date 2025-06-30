@@ -1,45 +1,47 @@
-<b>DEFINIZIONE GENERALE</b></br>
-La CDS view è un'infrastruttura che definisce un modello dati (simile ad una semplice view). Questo modello dati viene creato nel database e non sul server. Questo vantaggio viene dato dal fatto che una view normale risiede nel dictionary e per l'estrazione dei dati deve creare una connessione a DB passando dal server. La CDS è un semplice 'oggetto' che risiede nel DB e quindi non deve essere gestita una connessione con quest'ultimo. Esistono CDS VIEW con e senza parametri, ABAP CDS e HANA CDS. Quando vengono selezionati i campi da estrarre possono essere decise le chiavi anteponendo al campo la parola key ( le chiavi devono essere contigue e partire dal primo campo ).
-</br>
-</br>
-<b>ODATA SERVICE</b></br>
-Le CDS View possono essere utilizzate anche per esporre un servizio OData (altrimenti creabile tramite la transazione SEGW) tramite l'annotazione <i>@OData.publish: true.</i> Una volta creata la view utilizzare la transazione <i>/IWFND/MAINT_SERVICE</i> per registrare il servizio. Testare il servizio tramite la transazione <i>/IWFND/GW_CLIENT</i>. <br>
-Possono esserci degli errori: https://sapyard.com/odata-service-from-cds-annotation-not-working-in-browser-mode/
-</br>
-</br>
-<b>S4 CLOUD</b></br>
-Sono necessarie per l'estrazione dei dati dalle tabelle in S4 CLOUD. Vengono fornite delle CDS standard e possono essere create delle CDS custom partendo da queste (se possiedi il ruolo <i>BR_ADMINISTRATOR</i>).
-</br>
-</br>
-<b>AUTORIZZAZIONI</b></br>
-Quando una CDS viene creata ha l'annotazione <i>@AccessControl.authorizationCheck: #NOT_REQUIRED</i> per indicare che non servono privilegi particolari per poterla utilizzare. Va quindi creato un <i>Access Control</i>. Questo access control può essere utilizzato in 3 modi diversi: </br>  
-    - <i>Full access:</i> Non vengono inserite restrizioni. Nel Access control viene inserito solo il nome della view.</br> 
-    - <i>Literal Conditions:</i> Vengono imposte delle condizioni di estrazione per limitare i dati che vengono restituiti</br> 
-    - <i>PFCG (approfondimento nei link esterni):</i> Viene creato un ruolo che permette agli utenti di utilizzare solo alcune funzioni</br> 
-    
-Esistono altri metodi come la combinazione tra literal e pfcg, autorizzazioni ereditate e la current user authorization.
-</br>
-</br>
-<b>TRADUZIONI E TESTI</b></br>
-Nelle CDS possono essere creati dei testi: label (con un massimo di 60 caratteri) e le quickinfo (stringhe). 
-Vengono dichiarate con il simbolo "@":
+# GENERAL DEFINITION
+
+A **CDS view** is an infrastructure that defines a data model (similar to a simple view). This data model is created in the database and not on the server. This advantage stems from the fact that a normal view resides in the dictionary and must create a DB connection via the server for data extraction. A CDS view is a simple 'object' that resides directly in the DB and therefore does not require a connection to be managed with it. There are CDS VIEWS with and without parameters, ABAP CDS, and HANA CDS. When selecting fields to extract, keys can be defined by prefixing the field with the keyword `key` (keys must be contiguous and start from the first field).
+
+# ODATA SERVICE
+
+CDS Views can also be used to expose an **OData service** (otherwise creatable via transaction SEGW) through the annotation `@OData.publish: true`. Once the view is created, use transaction `/IWFND/MAINT_SERVICE` to register the service. Test the service using transaction `/IWFND/GW_CLIENT`.
+There might be errors: https://sapyard.com/odata-service-from-cds-annotation-not-working-in-browser-mode/
+
+# S4 CLOUD
+
+CDS Views are necessary for extracting data from tables in **S4 CLOUD**. Standard CDS views are provided, and custom CDS views can be created from these (if you possess the `BR_ADMINISTRATOR` role).
+
+# AUTHORIZATIONS
+
+When a CDS view is created, it has the annotation `@AccessControl.authorizationCheck: #NOT_REQUIRED` to indicate that no particular privileges are needed to use it. An **Access Control** must therefore be created. This access control can be used in 3 different ways:
+
+* **Full access:** No restrictions are applied. Only the view name is entered in the Access Control.
+* **Literal Conditions:** Extraction conditions are imposed to limit the data that is returned.
+* **PFCG (further details in external links):** A role is created that allows users to use only certain functions.
+
+Other methods exist, such as the combination of literal and PFCG, inherited authorizations, and current user authorization.
+
+# TRANSLATIONS AND TEXTS
+
+In CDS views, texts can be created: `label` (with a maximum of 60 characters) and `quickinfo` (strings).
+They are declared with the "@" symbol:
 ```abap
 @EndUserText.label: 'Test'
 @EndUserText.quickInfo: 'Second test'
 ```
-Questi testi possono essere tradotti poi con la transazione <i>SE63</i> ed è possibile inserire queste traduzioni in un trasporto con la transazione <i>SLXT</i>.<br>
-E' possibile accedere ai testi e alle traduzioni in modo dinamico utilizzanod la classe <i>CL_DD_DDL_ANNOTATION_SERVICE</i> metodo <i>GET_LABEL_4_ELEMENT</i>. Con questo metodo si può specificare la linga in cui si vogliono avere i testi oppure lasciare che prensa quella di accesso (senza quindi specificarla).
+These texts can then be translated with transaction SE63, and these translations can be included in a transport with transaction SLXT.
+It is possible to access texts and translations dynamically using the class CL_DD_DDL_ANNOTATION_SERVICE method GET_LABEL_4_ELEMENT. With this method, you can specify the language in which you want the texts or allow it to pick the access language (without specifying it).
 </br>
 </br>
-<b>SINTASSI BASILARE</b></br>
-Le CDS sono parametrizzate, ovvero accettano anche variabili in input (le CDS sono case-sensitive). E' importante ricordare che lavorano anche tramite alias, soprattutto quando vengono fatte delle associazioni di join. Anche qui esistono delle variabili di sistema:
+<b>BASIC SYNTAX</b></br>
+CDS views are parameterized, meaning they also accept input variables (CDS views are case-sensitive). It is important to remember that they also work through aliases, especially when performing join associations. System variables also exist here:
 
 | Variabile          | Descrizione                                                                 |
 |--------------------|-----------------------------------------------------------------------------|
-| user               | Corrisponde alla variabile sy-uname in abap. Contiene il nome utente        |
-| client             | Corrisponde alla variabile sy-mandt in abap. Contiene quindi il mandante    |               
-| system_language    | Corrisponde alla variabile sy-langu in abap. Lingua utilizzata dal sistema  |
-| system_date        | Corrisponde alla variabile sy-datum in abap. Contiene la data corrente      |
+| user               | Corresponds to the sy-uname variable in ABAP. Contains the user name        |
+| client             | Corresponds to the sy-mandt variable in ABAP. Contains the client    |               
+| system_language    | Corresponds to the sy-langu variable in ABAP. Language used by the system  |
+| system_date        | Corresponds to the sy-datum variable in ABAP. Contains the current date      |
 
 - <i>Case distinction</i>
     - CASE a IS NULL THEN 'err'
@@ -55,20 +57,20 @@ Le CDS sono parametrizzate, ovvero accettano anche variabili in input (le CDS so
     - a LIKE b
     - a IS [NOT] NULL
     
-- <i>Espressioni aritmetiche</i>
+- <i>Arithmetic expressions</i>
 
-- <i>Espressioni di aggregazioni</i>
+- <i>Aggregate expressions</i>
     - MAX
     - MIN
     - AVG
     - SUM
     - COUNT
-    - GROUP BY (obbligatorio)
+    - GROUP BY (mandatory)
     - HAVING
     
-- <i>Espressioni di casting</i>
+- <i>Casting expressions</i>
 
-| Variabile               | Descrizione                                                                 |
+| Variable               | Description                                                                 |
 |-------------------------|-----------------------------------------------------------------------------|
 | abap.char( len )        | CHAR with length len                                                        |
 | abap.clnt[(3)]          | CLNT                                                                        |               
@@ -95,9 +97,9 @@ Le CDS sono parametrizzate, ovvero accettano anche variabili in input (le CDS so
 </br>
 
  - Note
-    - <b>System access:</b> (privilege) per l'utilizzo di certe funzioni
-    - <b>Authorization Objects:</b> sono certe transazioni a cui possiamo accedere o meno
-    - <b>DCL:</b> Data control language. Utilizzato per controllare i privilegi nelle operazioni su DB
-    - <b>GRANT:</b> Usato per indicare ogni privilegio per un utente
-    - <b>REVOKE:</b> Usato per rimuovere i privilegi
-    - <b>ROLE:</b> Permessi speciali per alcune funzioni specifiche. Mantenute dalla transazione <i>PFCG</i>.
+    - <b>System access:</b> (privilege) for using certain functions
+    - <b>Authorization Objects:</b> These are certain transactions that we can access or not.
+    - <b>DCL:</b> Data Control Language. Used to control privileges for database operations
+    - <b>GRANT:</b> Used to indicate every privilege for a user
+    - <b>REVOKE:</b> Used to remove privileges
+    - <b>ROLE:</b> Special permissions for specific functions. Maintained by transaction <i>PFCG</i>.
