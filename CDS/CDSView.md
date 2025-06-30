@@ -93,10 +93,11 @@ CDS views are parameterized, meaning they also accept input variables (CDS views
 
 </br>
 </br>
- - Note
-    - <b>System access:</b> (privilege) for using certain functions
-    - <b>Authorization Objects:</b> These are certain transactions that we can access or not.
-    - <b>DCL:</b> Data Control Language. Used to control privileges for database operations
-    - <b>GRANT:</b> Used to indicate every privilege for a user
-    - <b>REVOKE:</b> Used to remove privileges
-    - <b>ROLE:</b> Special permissions for specific functions. Maintained by transaction <i>PFCG</i>.
+
+Note
+ - System access: (privilege) for using certain functions
+ - Authorization Objects: These are certain transactions that we can access or not.
+ - DCL: Data Control Language. Used to control privileges for database operations.
+ - GRANT: Used to indicate every privilege for a user.
+ - REVOKE: Used to remove privileges.
+ - ROLE: Special permissions for specific functions. Maintained by transaction PFCG.
