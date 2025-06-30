@@ -6,34 +6,36 @@
  - [Toolbar](#Toolbar)
  - [Moduli](#Moduli)
 
- ### Dynpro
- La dynpro è la combinazione della logica e della view. Possiede dei moduli per la gestione di input (PAI) e di output (PBO). In questi moduli è possibile inserire del codice custom per modificare a piacimento dati o comportamenti di determinati elementi. La dynpro è identificata da un numero di 4 cifre e viene chiamata dal report tramite la chiamata <i>CALL SCREEN XXXX</i>.
+## Dynpro
 
-**PAI** </br>
-Vengono gestiti i dati di input, estratti nuovi dati, ecc... Qui possono essere modificati i valori mostrati a schermo. Per far si che lo schermo rimanga ggiornato inserire il metodo <i>cl_gui_cfw=>set_new_ok_code( new_code = 'REFR' )</i> alla fine del modulo, affinchè lo schermo venga aggiornato.   
-   
-Se l'alv ha campi editabili è possibile intercettare le modifiche con il metodo *lo_alv->check_changed_data( ).*.
+A **dynpro** is a combination of logic and view. It includes modules for managing input (**PAI** - Process After Input) and output (**PBO** - Process Before Output). You can insert custom code into these modules to modify data or the behavior of specific elements as needed. Each dynpro is identified by a 4-digit number and is called from a report using the `CALL SCREEN XXXX` command.
 
-**PBO**</br>
-In questo modulo è possibile nascondere o mostrare i vari elementi contenuti nella dynpro. E' infatti possibile ciclare sui vari elementi tramite il <i>LOOP AT SCREEN</i> e vedere il nome (o il gruppo) dell'elemento stampato (questo riguarda solo gli elementi creati tramite layout della dynpro, non coinvolge cose nell'alv).
+### PAI (Process After Input)
 
-Per sapere lo stato della dynpro si deve controllare il campo aktyp:
-- Se A: visualizzazione
-- Se H: creazione
-- Se V: Modifica
+This module handles input data and extracts new data, among other things. You can modify the values displayed on the screen here. To ensure the screen stays updated, insert the method `cl_gui_cfw=>set_new_ok_code( new_code = 'REFR' )` at the end of the module to refresh the display.
 
-Per sapere se una transazione è in lettura/scrittura/modifica leggere dalla tabella T180.
+If your ALV grid has editable fields, you can intercept changes using the method `lo_alv->check_changed_data( )`.
 
- ### FieldCatalog
- Il field catalog è la tabella che contiene le proprietà dei dati che verranno stampati tramite la ALV. In questo caso il field catalog viene creato dinamicamente, utilizzando il descrittore di tabelle. Siccome prende i testi dei dati dalla tabella dd04t è possibile che non tutti i campi vengano valorizzati (oppure con la presenza di più campi dello stesso tipo). In quel caso sono da inserire a mano. 
- 
- Nel seguente esempio la tabella *IT_CUSTOM_FC* viene utilizzata per modificare valori particolari del fieldcatalog.
- 
- FIELDNAME = 'matnr' fc_component = 'scrtext_l' value = 'Descr. colonna matnr custom'
+### PBO (Process Before Output)
+
+In the PBO module, you can hide or display various elements within the dynpro. You can loop through these elements using `LOOP AT SCREEN` to inspect the name (or group) of each displayed element. This applies only to elements created through the dynpro's layout, not those within an ALV grid.
+
+To determine the current status of the dynpro, check the `aktyp` field:
+
+* If **A**: Display mode
+* If **H**: Creation mode
+* If **V**: Modification mode
+
+To determine if a transaction is in read, write, or modify mode, refer to table `T180`.
+
+---
+
+## Field Catalog
+
+The **field catalog** is a table that defines the properties of the data to be displayed by an ALV grid. In many cases, the field catalog is created dynamically using the table descriptor. Since it retrieves text descriptions from table `dd04t`, it's possible that not all fields will be populated, or you might encounter multiple fields of the same type. In such scenarios, these entries must be added manually.
 
 ```abap
 value( IS_OUTTAB )	TYPE DATA	 " Riga tabella di output
-value( IT_CUSTOM_FC )	TYPE ZT_FC_CUSTOM OPTIONAL	table " Valori speciali per il fieldcatalog
 value( CT_FIELDCAT )	TYPE LVC_T_FCAT	Tabella finale fieldcatalog
 
 
@@ -73,10 +75,6 @@ value( CT_FIELDCAT )	TYPE LVC_T_FCAT	Tabella finale fieldcatalog
     WHERE rollname EQ @ct_fieldcat-ref_field
     AND ddlanguage EQ @sy-langu.
     
-  LOOP AT it_custom_fc REFERENCE INTO DATA(lr_cust_fc).
-    TRANSLATE lr_cust_fc->fieldname TO UPPER CASE.
-  ENDLOOP.
-
   LOOP AT ct_fieldcat ASSIGNING FIELD-SYMBOL(<fs_fcat>).
     <fs_fcat>-scrtext_m = VALUE #( lt_coldescr[ rollname = <fs_fcat>-ref_field ]-scrtext_m OPTIONAL ).
 
@@ -91,11 +89,11 @@ value( CT_FIELDCAT )	TYPE LVC_T_FCAT	Tabella finale fieldcatalog
   ENDLOOP.
 ```
 
- ### Chiamare ALV
- Un'ALV è un metodo di output per mostrare tabelle o dati a schermo, dopo un'elaborazione. Esistino varie classi (alv, salv, ...) ma funzionano più o meno allo stesso modo. Per utilizzare un'alv serve un container (che dia all'alv un'estensione sullo schermo), il fieldcatalog (ovvero la descrizione della tabella che verrà mostrata) e un layout (conterrà eventuali componenti come il colore, il tipo di selezione righe e altro).
+### ALV (ABAP List Viewer)
 
-> Prima di generare la alv deve essere creato il field-catalog (vedi la pagina apposita).
-> Inserire il componente "Custom Control" nella Dynpro utilizzata per stampare la Alv dandogli il nome del Container come nome (in questo caso "CONT")
+An ALV is an output method used to display tables or data on the screen after processing. Various classes exist (e.g., ALV, SALV), but they generally function in a similar way. To use an ALV, you need a **container** (which defines the ALV's display area on the screen), a **field catalog** (which describes the table to be shown), and a **layout** (which holds optional components like color, row selection type, and more).
+Before generating the ALV, the **field catalog** must be created (refer to its dedicated page for details).
+Insert the "Custom Control" component into the Dynpro used to display the ALV, giving it the same name as your container (in this example, "CONT").
 
 ```abap
 DATA: r_cont TYPE REF TO cl_gui_custom_container,
@@ -134,147 +132,153 @@ DATA: it_fcat TYPE TABLE OF lvc_s_fcat,
 
   ENDIF.
 ```
-Un'alv contiene degli <i>Eventi</i> che possono essere implementati nel programma locale. Gli eventi devono essere implementati attraverso un metodo Handler:
+## ALV Events
+
+An ALV contains **Events** that can be implemented in the local program. These events must be implemented through a **Handler method**.
+
 ```abap
-*lo_event è una classe handler
+*lo_event is a event class
 CREATE OBJECT lo_event.
 SET HANDLER lo_event->handle_hotspot_click FOR r_alv.
 ```
-Possono essere mostrate piu alv in uno stesso screen utilizzando uno splitter container.
+## Displaying Multiple ALVs
+
+Multiple ALVs can be displayed on the same screen using a splitter container.
+
 ```abap
-*  Creo il contenitore che definisce l'estensione di stampa su schermo
-    CREATE OBJECT lo_cont_docking
+* Create the container that defines the print extension on the screen
+  CREATE OBJECT lo_cont_docking
+    EXPORTING
+      parent = cl_gui_container=>screen0
+      ratio  = 95
+    EXCEPTIONS
+      OTHERS = 6.
+
+* Set the extension of the print area on the screen
+  CALL METHOD lo_cont_docking->set_extension
+    EXPORTING
+      extension  = 99999
+    EXCEPTIONS
+      cntl_error = 1
+      OTHERS     = 2.
+
+* Create the first split container with the docking container as parent. Set three rows for the three ALVs used
+    CREATE OBJECT lo_split_co
       EXPORTING
-        parent = cl_gui_container=>screen0
-        ratio  = 95
-      EXCEPTIONS
-        OTHERS = 6.
+        parent  = lo_cont_docking
+        rows    = 3
+        columns = 1
+        align   = 15.
 
-*   Imposto l'estensione della stampa su schermo
-    CALL METHOD lo_cont_docking->set_extension
+* Assign the container graphic_parent_hd -> header to the first row of the split container
+    CALL METHOD lo_split_co->get_container
       EXPORTING
-        extension  = 99999
+        row        = 1
+        column     = 1
+      RECEIVING
+        container = graphic_parent_hd.
+
+    CALL METHOD lo_split_co->set_row_height
+      EXPORTING
+        id          = 1
+        height      = 4
+      .
+* Assign the container graphic_parent1 -> Coil to the first row of the split container
+    CALL METHOD lo_split_co->get_container
+      EXPORTING
+        row        = 2
+        column     = 1
+      RECEIVING
+        container = graphic_parent1.
+
+* Assign the container graphic_parent2 -> Orders to the first row of the split container
+    CALL METHOD lo_split_co->get_container
+      EXPORTING
+        row        = 3
+        column     = 1
+      RECEIVING
+        container = graphic_parent2.
+
+* Create the ALV for coils with graphic_parent1 as parent
+    CREATE OBJECT lo_alv_up
+      EXPORTING
+        i_parent = graphic_parent1.
+
+* Create the ALV for orders with graphic_parent2 as parent
+    CREATE OBJECT lo_alv_dw
+      EXPORTING
+        i_parent = graphic_parent2.
+
+* Set an action handler for the two ALVs that calls functions based on the method called
+    SET HANDLER me->handle_user_command FOR lo_alv_up.
+    SET HANDLER me->handle_user_command FOR lo_alv_dw.
+
+    wa_layout_1-cwidth_opt    = 'X'.
+    wa_layout_2-cwidth_opt  = 'X'.
+    wa_layout_1-sel_mode     = 'D'.
+    wa_layout_2-sel_mode    = 'D'.
+    wa_layout_2-info_fname  = 'ROWCOLOR'.
+    wa_layout_1-info_fname   = 'ROWCOLOR'.
+
+    CALL METHOD lo_alv_up->set_table_for_first_display
+      EXPORTING
+        is_layout             = wa_layout_1
+        is_variant            = lv_repname
+        i_save                = 'A'
+      CHANGING
+        it_fieldcatalog       = it_fcat_1[]
+        it_outtab             = out_grid_1
       EXCEPTIONS
-        cntl_error = 1
-        OTHERS     = 2.
+        invalid_parameter_combination = 1
+        program_error         = 2
+        too_many_lines        = 3
+        OTHERS                = 4.
+    IF sy-subrc <> 0.
+    ENDIF.
 
-*     Creo il primo split container con parente il contenitore docking. Imposto tre righe per le tre alv utilizzate
-      CREATE OBJECT lo_split_co
-        EXPORTING
-          parent  = lo_cont_docking
-          rows    = 3
-          columns = 1
-          align   = 15.
-
-*     Assegno alla prima riga del container splittato il container graphic_parent_hd -> header
-      CALL METHOD lo_split_co->get_container
-        EXPORTING
-          row       = 1
-          column    = 1
-        RECEIVING
-          container = graphic_parent_hd.
-
-      CALL METHOD lo_split_co->set_row_height
-        EXPORTING
-          id                = 1
-          height            = 4
-        .
-*     Assegno alla prima riga del container splittato il container graphic_parent1 -> Coil
-      CALL METHOD lo_split_co->get_container
-        EXPORTING
-          row       = 2
-          column    = 1
-        RECEIVING
-          container = graphic_parent1.
-
-*     Assegno alla prima riga del container splittato il container graphic_parent2 -> Ordini
-      CALL METHOD lo_split_co->get_container
-        EXPORTING
-          row       = 3
-          column    = 1
-        RECEIVING
-          container = graphic_parent2.
-
-*     Creo l'alv per i coil con parente graphic_parent1
-      CREATE OBJECT lo_alv_up
-        EXPORTING
-          i_parent = graphic_parent1.
-
-*     Creo l'alv per gli ordini con parente graphic_parent2
-      CREATE OBJECT lo_alv_dw
-        EXPORTING
-          i_parent = graphic_parent2.
-
-*     Imposto per le due alv un gestore di azioni che richiama funzioni in base al metodo chiamato
-      SET HANDLER me->handle_user_command FOR lo_alv_up.
-      SET HANDLER me->handle_user_command FOR lo_alv_dw.
-      
-      wa_layout_1-cwidth_opt   = 'X'.
-      wa_layout_2-cwidth_opt  = 'X'.
-      wa_layout_1-sel_mode     = 'D'.
-      wa_layout_2-sel_mode    = 'D'.
-      wa_layout_2-info_fname  = 'ROWCOLOR'.
-      wa_layout_1-info_fname   = 'ROWCOLOR'.
-      
-      CALL METHOD lo_alv_up->set_table_for_first_display
-        EXPORTING
-          is_layout                     = wa_layout_1
-          is_variant                    = lv_repname
-          i_save                        = 'A'
-        CHANGING
-          it_fieldcatalog               = it_fcat_1[]
-          it_outtab                     = out_grid_1
-        EXCEPTIONS
-          invalid_parameter_combination = 1
-          program_error                 = 2
-          too_many_lines                = 3
-          OTHERS                        = 4.
-      IF sy-subrc <> 0.
-      ENDIF.
-
-     CALL METHOD lo_alv_dw->set_table_for_first_display
-        EXPORTING
-          is_layout                     = wa_layout_2
-          is_variant                    = lv_repnam2
-          i_save                        = 'A'
-        CHANGING
-          it_fieldcatalog               = it_fcat_2
-          it_outtab                     = out_grid_2
-        EXCEPTIONS
-          invalid_parameter_combination = 1
-          program_error                 = 2
-          too_many_lines                = 3
-          OTHERS                        = 4.
-      IF sy-subrc <> 0.
-      ENDIF.
+    CALL METHOD lo_alv_dw->set_table_for_first_display
+      EXPORTING
+        is_layout             = wa_layout_2
+        is_variant            = lv_repnam2
+        i_save                = 'A'
+      CHANGING
+        it_fieldcatalog       = it_fcat_2
+        it_outtab             = out_grid_2
+      EXCEPTIONS
+        invalid_parameter_combination = 1
+        program_error         = 2
+        too_many_lines        = 3
+        OTHERS                = 4.
+    IF sy-subrc <> 0.
+    ENDIF.
 ```
 
-Per creare un Header sopra una tabella utilizzare lo splitter per creare due container. Inserire poi il testo:
+To create a header above a table, use the splitter to create two containers. Then insert the text:
 
 ```abap
 DATA:  lo_doc_header         TYPE REF TO cl_dd_document.
   lo_doc_header->initialize_document( ).
 
-  lo_doc_header->add_text( text =  'Legenda' ).
+  lo_doc_header->add_text( text =  'Legend' ).
   lo_doc_header->new_line( ).
-  lo_doc_header->add_text( text =  'Riga 1' ).
+  lo_doc_header->add_text( text =  'Row 1' ).
   lo_doc_header->add_gap( ). " Tab
-  lo_doc_header->add_text( text =  'Riga 1' ).
-  
+  lo_doc_header->add_text( text =  'Row 1' ).
+
 
   lo_doc_header->merge_document( ).
   lo_doc_header->display_document( parent = lo_cont_up ).
 ```
 
-### Moduli 
-Quando si chiama una ALV da un report è necessario utilizzare i moduli della dynpro che si chiama. I moduli sono INPUT e OUTPUT.
-Il primo gestisce i pulsanti, il secondo la visualizzazione dei campi.
+### Modules 
+When calling an ALV from a report, you need to use the modules of the dynpro being called. The modules are INPUT and OUTPUT.
+The first handles buttons, the second the display of fields.
 
 ``` abap
 MODULE status_0100 OUTPUT.
   SET PF-STATUS 'STAT100'.
   SET TITLEBAR 'Test'.
-  
+
   ... r_alv->set_table_for_first_display ...
 ENDMODULE.
 
@@ -286,8 +290,7 @@ MODULE user_command_0100 INPUT.
 ENDMODULE.
 ```
 
-
-<h1>Formato celle</h1>    
+<h1>Cell Formatting</h1>    
 ### Dropdown values    
 
 ``` abap    
