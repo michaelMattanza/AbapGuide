@@ -290,9 +290,10 @@ MODULE user_command_0100 INPUT.
 ENDMODULE.
 ```
 
-<h1>Cell Formatting</h1>    
-### Dropdown values    
+<h1>Cell Formatting</h1>      
 
+ ### Dropdown values    
+       
 ``` abap    
 " Fieldcatalog Setting
 fieldname = 'zzfieldname'
