@@ -1,22 +1,22 @@
-<h1>Sintassi base</h1>
+<h1>Basic Syntax</h1>
 
-**Dichiarazione variabili input** </br>
+**Declaring Input Variables** </br>
 
 ```abap
-" Chiede in input un valore obbligatorio che alloca nella memoria con id wrk
+" Prompts for an obligatory input value that it allocates in memory with ID wrk
 PARAMETERS werks TYPE werks_d MEMORY ID wrk OBLIGATORY,
            in_data TYPE sy-datum. 
 
-" Chiede in input dei range 
+" Prompts for input ranges 
 SELECT-OPTIONS: so_kunnr FOR zstock_b-kunnr,
                 so_matnr FOR zstock_b-matnr.
                 
 INITIALIZATION.
-in_data = '20190709'. "Imposto come valore consigliato la data 09-07-2019
+in_data = '20190709'. "Sets 09-07-2019 as the suggested value
 ```
 
 **Search Help**<br>
-Un search help viene utilizzato per la ricerca di valori possibili per un determinato campo in input. 
+A search help is used to find possible values for a specific input field
 
 ```abap
 ************************************************************************
@@ -69,17 +69,17 @@ AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_varnt.
 ```
 
 
-**Dichiarazione variabili interne** </br>
+**Declaring Internal Variables** </br>
 
 ```abap
-" Dichiaro diversi tipi di variabili seguendo la naming convention: 
+" Declare different types of variables following the naming convention:
 " - l = local,  g = global, i = import, e = export
 " - v = variable, s = structure, t = table, f = field, r = range, ref = reference, o = object
 DATA: lv_werks TYPE werks_d,
       ls_ekko  TYPE ekko,
       lt_ekpo  TYPE TABLE OF ekpo. 
 
-" Dichiaro un tipo struttra / tabella seguendo la naming convention:
+" Declare a structure / table type following the naming convention:
 " - ty = type, tt = type table
 DATA: BEGIN OF ty_example,
       field1 type type1,
@@ -89,9 +89,9 @@ DATA: BEGIN OF ty_example,
  DATA: lt_ex TYPE tt_example. " lt_ex è quindi una tabella
       
 ```
-**Raggruppare il codice**
+**Grouping Code**
 
-iL *DEFINE* Viene utilizzato per poter utilizzare più volte le stesse righe di codice. I define non li debuggare e non possono essere utilizzati fuori dal programma. 
+iL *DEFINE* is used to reuse the same lines of code multiple times. DEFINEs cannot be debugged and cannot be used outside the program.
 
 ```abap
 DATA: RESULT TYPE I,
@@ -111,7 +111,8 @@ OPERATION 4 + 3.
 OPERATION 2 ** 7.
 OPERATION N2 - N1.
 ```
-E' possibile utilizzare i *FORM / PERFORM* per poter utilizzare lo stesso codice in più punti. Possono essere chiamati anche da programmi esterni ma non possono essere creati ovunque (es. metodi delle classi).
+You can use *FORM / PERFORM* to use the same code in multiple places. They can also be called from external programs but cannot be created anywhere (e.g., class methods).
+
 ```abap
 PERFORM OPERATION CHANGING n1 n2 tot.
 
@@ -124,156 +125,153 @@ FORM OPERATION CHANGING  lv_n1 TYPE i
 ENDFORM.
 ```
 
-**Stringhe**<br>
-Quando si cerca un valore specifico in una stringa contenente un separatore definito, è possibile ottenere velocemente la sottostringa grazie ad una di queste funzioni.
+**Strings**<br>
+When searching for a specific value in a string containing a defined separator, you can quickly get the substring using one of these functions.
+
 ```abap
 data(result) = segment( val = 'VAL1-VAL2-VAL3' index = 3 sep = '-' ).
 data(result) = match( val  = 'VAL1-VAL2-VAL3'  regex = '[^-]*$' ).
 data(result) = SubString( Val = 'VAL1-VAL2-VAL3' Off = Find( Val = 'VAL1-VAL2-VAL3' Regex = '-[^-]+$' ) + 1 ).
 ```
-Per concatenare delle variabili in una stringa utilizzare la seguente sintassi:
+To concatenate variables into a string, use the following syntax:
 ```abap
 CONCATENATE lv_var1 lv_var2 INTO lv_string.
 
 "740
 lv_string = |{ lv_var1 }{ lv_var2 }|.
 ```
-Utilizzando la sinstassi 740 è possibile sfruttare anche delle funzioni di conversione.
+Using the 740 syntax, you can also leverage conversion functions.
+
 ```abap
-" Allineamento   
+" Alignment   
 WRITE / |{ 'Left'     WIDTH = 20 ALIGN = LEFT     PAD = '0' }|.   
 WRITE / |{ 'Center'   WIDTH = 20 ALIGN = CENTER   PAD = '0' }|.   
 WRITE / |{ 'Right'    WIDTH = 20 ALIGN = RIGHT    PAD = '0' }|.   
 
-" Stile carattere   
+" Character style   
 WRITE / |{ ‘Text’ CASE = (cl_abap_format=>c_raw) }|.   
 WRITE / |{ ‘Text’ CASE = (cl_abap_format=>c_upper) }|.   
 WRITE / |{ ‘Text’ CASE = (cl_abap_format=>c_lower) }|.   
 
-" Conversione numerica   
+" Numeric conversion   
 DATA(lv_vbeln) = ‘0000012345’.   
 WRITE / |{ lv_vbeln  ALPHA = OUT }|.     “or use ALPHA = IN to go in   
 
-" Conversione data   
+" Date conversion   
 WRITE / |{ pa_date DATE = ISO }|.           “Date Format YYYY-MM-DD   
 WRITE / |{ pa_date DATE = User }|.          “As per user settings   
 WRITE / |{ pa_date DATE = Environment }|.   “Formatting setting of   
 
-" Conversione quantità    
+" Quantity conversion    
 DATA(lv_qty) = 13.000.
 
-WRITE lv_menge TO lv_menge_char LEFT-JUSTIFIED UNIT lv_meinh. " se lv_meinh == udm senza decimali (es. pezzi ) -> lv_menge_char = 13
+WRITE lv_menge TO lv_menge_char LEFT-JUSTIFIED UNIT lv_meinh. " if lv_meinh == udm without decimals (e.g., pieces) -> lv_menge_char = 13
 ```
 <h1>Query</h1>
 
-**Select single:** estraggo solo un valore
+**Select single:** extracts only one value
  ```abap
-SELECT SINGLE campo1, campo2 
+SELECT SINGLE field1, field2 
   FROM table INTO variable
-  WHERE condizione.
+  WHERE condition.
   
-SELECT SINGLE campo1, campo2 
+SELECT SINGLE field1, field2 
   FROM table INTO @DATA(variable)
-  WHERE condizione.
+  WHERE condition.
 ```
 
-**NB**    
-*SELECT SINGLE* estrae da database il primo record che corrisponde alle condizioni definite nella query mentre *SELECT UP TO 1 ROWS* estrae tutti i record che corrispondono alla condizione di where ma verrà mostrato solo il primo nel risultato finale. Il secondo caso però, prima di restituire il risultato, svolge operazioni di aggregazione e raggruppamento, per restituire il risultato che più si addice alle condizioni di ricerca; viene consigliata infatti per le estrazioni senza una chiave primaria completa.
+**Info**    
+*SELECT SINGLE* extracts the first record from the database that matches the conditions defined in the query, while *SELECT UP TO 1 ROWS* extracts all records that match the WHERE condition, but only the first will be displayed in the final result. However, the second case, before returning the result, performs aggregation and grouping operations to return the result that best suits the search conditions; it is therefore recommended for extractions without a complete primary key.
 
-**Select count:** contare le righe di una select
+**Select count:** counts the rows of a select
 ```abap
 SELECT COUNT(*) 
   FROM table
-  WHERE condizione.
- " sy-dbcnt contiene il counter
+  WHERE condition.
+ " sy-dbcnt contains the counter
   
-SELECT COUNT( DISTINT nomecampo )
+SELECT COUNT( DISTINT field1 )
   FROM table INTO variable
-  WHERE   condizione.
+  WHERE   condition.
 ```
 
-**Select into table:** estraggo più valori
+**Select into table:** extracts multiple values
 ```abap
-SELECT campo1 campo2 
+SELECT field1 field2 
   FROM table INTO TABLE tab
-  WHERE condizione.
+  WHERE condition.
   
-SELECT campo1 campo2
+SELECT field1 field2
   FROM table INTO CORRESPONDING FIELDS OF TABLE tab
-  WHERE condizione.
+  WHERE condition.
   
-SELECT campo1 campo2
+SELECT field1 field2
   FROM table INTO TABLE tab
   FOR ALL ENTRIES IN tab2
-  WHERE condizione.
+  WHERE condition.
   
- SELECT campo1, campo2
+ SELECT field1, field2
   FROM table INTO TABLE @DATA(tab)
-  WHERE condizione.
+  WHERE condition.
   
-*  Nella condizione del WHERE è utilizzabile anche  '<> @( VALUE #( ) )' per indicare un valore vuoto 
+*  In the WHERE condition, '<> @( VALUE #( ) )' can also be used to indicate an empty value. 
 ```
 **For All Entries**   
-Il *for all entries* viene utilizzato per fare un'estrazione per ogni record di una tabella interna.   
-NON METTERE SELECT NEI LOOP!   
-Il limite delle select con il for all entries è che molte funzioni di raggruppamento e alcune keyword della sintassi nuova non sono utilizzabili. Se si sta utilizzando un sistema aggiornato (SAP BASIS 752) è possibile evitare il for all entries ( per approfondimenti vedere link esterni ):   
+*For all entries*  used to extract data for each record of an internal table.   
+DO NOT PUT SELECTS IN LOOPS!  
+The limitation of SELECT with FOR ALL ENTRIES is that many grouping functions and some keywords of the new syntax are not usable. If you are using an updated system (SAP BASIS 752), it is possible to avoid FOR ALL ENTRIES (for more details, see external links):
 ```abap
-SELECT campo1 campo2
+SELECT field1 field2
   FROM table INTO CORRESPONDING FIELDS OF TABLE tab
-  WHERE condizione.
+  WHERE condition.
   
 " For all entries
-SELECT campo1 campo2
+SELECT field1 field2
   FROM table INTO TABLE tab2
   FOR ALL ENTRIES IN tab
-  WHERE campo1 = tab-campo1.
+  WHERE field1 = tab-field1.
   
- " Senza for all entries
- SELECT campo1 campo2
+ " No for all entries
+ SELECT field1 field2
   FROM table INTO TABLE tab2
-  WHERE campo1 IN ( select campo1 from @tab ).
+  WHERE field1 IN ( select field1 from @tab ).
   
 ```   
-**Da select a range:** estraggo più valori
+**From SELECT to RANGE:** extract multiple values
 ```abap
-  SELECT sign opt AS option low high FROM /reg/param_selop
+  SELECT sign opt AS option low high FROM tvarvc
          INTO CORRESPONDING FIELDS OF TABLE itab_tipo_range
-         WHERE zfunz EQ nomezfunz.
+         WHERE name EQ nomezfunz.
   
-*  Nella condizione del WHERE è utilizzabile anche  '<> @( VALUE #( ) )' per indicare un valore vuoto. Preferibile usare @space.
+*  In the WHERE condition, '<> @( VALUE #( ) )' can also be used to indicate an empty value. @space is preferable.
 ```
-**ATTENZIONE:**
-> Per le query esistono due sintassi: la sintassi vecchia che non richiede la virgola tra i campi da selezionare, la nuova sintassi si. 
-  Nella nuova sintassi deve essere inserita la chiocciola davanti alle variabili del report (quindi no campi o nomi tabella di dictionary) 
-  ed è ammessa la dichiarazione inline della variabile o tabella (@DATA(nome)).  
+**ATTENTION:**
+> For queries, there are two syntaxes: the old syntax which does not require a comma between the fields to be selected, and the new syntax which does. In the new syntax, an "@" symbol must be placed before report variables (i.e., not dictionary fields or table names), and inline variable or table declaration (@DATA(name)) is allowed.
   
-> Differenza tra **INTO TABLE** e **INTO CORRESPONDING FIELD OF TABLE**. Il primo estrae dei dati e li mette nell'ordine di estrazione 
-nella tabella di destinazione (quindi la tabella deve avere la struttura ordinata e con i nomi corretti), mentre nel secondo caso la 
-query inserisce i valori estratti dal database nella colonna che corrisponde al dato estratto, se la colonna viene trovata.
-
+> Difference between **INTO TABLE** and **INTO CORRESPONDING FIELD OF TABLE**. The first extracts data and places it in the destination table in the order of extraction (so the table must have the correct structure and names), while in the second case, the query inserts the extracted values from the database into the column that corresponds to the extracted data, if the column is found.
 
 <h1>Tabelle interne - Lettura valori</h1>   
 
-**Dichiarare un tipo tabella interno al programma**
+**Internal Tables - Reading Values**
 
-*ATTENZIONE*
-- *sy-index*: indice contenuto nei DO e nei WHILE
-- *sy-tabix*: indice nel loop di una tabella
+*ATTENTION*
+- *sy-index*: index contained in DO and WHILE loops
+- *sy-tabix*: index in a table loop
 
 ```abap
-" Dichiaro un tipo di struttura
+" Declare a structure type
 TYPES: BEGIN OF ty_example,
     matnr TYPE matnr,
     mtart TYPE mtart,
     END OF ty_example.
 
-DATA : it_example TYPE TABLE OF ty_example, " Istanzio una tabella di tipo ty_example
-       wa_example TYPE ty_example.          " Istanzio una struttura di tipo ty_example
+DATA : it_example TYPE TABLE OF ty_example, " Instantiate a table of type ty_example
+       wa_example TYPE ty_example.          " Instantiate a structure of type ty_example
  
 ```
-E' possibile usare 3 metodi diversi per estrarre i dati dalle tabelle:
+You can use 3 different methods to extract data from tables:
 
-- Utilizzando la struttura come riga della tabella
+- Using the structure as a table row
 ```abap
 loop at it_example into wa_example.
     write:/ wa_example-matnr .
@@ -281,7 +279,7 @@ loop at it_example into wa_example.
 endloop.
 ```
 
-- Utilizzando i field-symbols come puntatori. 
+- Using field-symbols as pointers. 
 ```abap
 loop at it_example assigning field-symbol(<fs_example>).
     write:/ <fs_example>-matnr .
@@ -289,7 +287,8 @@ loop at it_example assigning field-symbol(<fs_example>).
 endloop.
 ```
 
-- Utilizzando i field-symbols come puntatori quando una tabella è dinamica (non esiste quindi una struttura fissa ma viene generata da funzioni).
+- Using field-symbols as pointers when a table is dynamic (i.e., there is no fixed structure but it is generated by functions).
+
 ```abap
 FIELD-SYMBOLS: <fs_matnr> TYPE any,
                <fs_mtart> TYPE any. " o data
@@ -302,7 +301,7 @@ loop at it_example assigning field-symbol(<fs_example>).
 endloop.
 ```
 
-Esiste un'alternativa: le reference (preferibile però per la read table).
+There is an alternative: references (preferable for read table).
 ```abap
 loop at it_example reference into data(lr_example).
     write:/ lr_example->matnr .
@@ -315,43 +314,43 @@ IF lr_example IS BOUND.
 ENDIF.
 ```
 
-Se si vuole leggere una riga o il valore di una riga senza doverne modificare il valore è consigliato utilizzare controlli inline:
+If you want to read a row or the value of a row without modifying its value, it's recommended to use inline controls:
 ```abap
 DATA(ls_example) = VALUE #( it_example[ matnr = '22000000' ] OPTIONAL ).
-" Se la riga non esiste viene creata una struttura vuota.
+" If the row does not exist, an empty structure is created.
 
 DATA(lv_mtart) = VALUE #( it_example[ matnr = '22000000' ]-mtart OPTIONAL ).
 DATA(lv_mtart) = VALUE #( it_example[ matnr = '22000000' ]-mtart DEFAULT def ).
-" Se la riga non esiste viene creata la variabile vuota. Nel secondo caso assegno un valore di default se il valore cercato è vuoto
+" If the row does not exist, the variable is created empty. In the second case, a default value is assigned if the sought value is empty.
 ```
-<h1>Tabelle interne - Scrittura valori</h1>   
+<h1>Internal Tables - Writing Values</h1>   
 
 **Move-corresponding** <br>   
-Il move corresponding è utile per spostare le righe di una tabella in una tabella di destinazione, con la conversione del tipo riga in base ai dati in movimento. Quando si deve aggiungere delle righe in una tabella con dentro dei record, il move-corresponding sovrascriverebbe i record gia presenti. 
-E' possibile bypassare questo problema con la sintassi:   
+MOVE-CORRESPONDING is useful for moving rows from one table to a destination table, with row type conversion based on the data being moved. When adding rows to a table that already contains records, MOVE-CORRESPONDING would overwrite the existing records.
+You can bypass this problem with the syntax: 
 ```abap
 gt_outtab = CORRESPONDING #( BASE ( gt_outtab ) lt_tmp_out ).
 ```
 
-**Inserire nuovi valori**   
-Esistono vari modi per inserire una riga di valori in una tabella interna e variano in base all'esigenza.      
+**Inserting New Values**   
+There are various ways to insert a row of values into an internal table, and they vary depending on the requirement.      
 ```abap
 DATA: lt_mara TYPE TABLE OF mara.
 
-" Inserire una riga in coda   
+" Insert a row at the end   
 APPEND VALUE #( matnr = '123' ) TO lt_mara.   
 
-" Inserire una riga in una posizione specifica   
+" Insert a row at a specific position   
 INSERT VALUE #( matnr = '123') INTO TABLE lt_mara INDEX n.
 
-" Inserire la prima riga   
+" Insert the first row   
 lt_mara = ( ( matnr = '123' ) ).
 ```
 
-<h1>Tabelle interne - Ordinamento e gestione valori</h1>   
+<h1>Internal Tables - Sorting and Value Management</h1>   
 
-**Raggruppamento di una tabella**   
-Se in una tabella ho bisogno di fare il *GROUP BY* basandomi su varie colonne, posso sfruttare il ciclo *FOR* per generare una tabella contenente il raggruppamento.   
+**Table Grouping**   
+If I need to perform a GROUP BY on a table based on various columns, I can use the FOR loop to generate a table containing the grouping.   
 
 ```abap
   TYPES: BEGIN OF ty_imp,
@@ -370,17 +369,24 @@ DATA(lt_count_imp) = VALUE tty_imp(
   ).
   ```
 
-  **Ciclo con GROUP BY**    
+  **Loop with GROUP BY**    
 Questo ciclo permette di raggruppare in loop un determinato gruppo di valori secondo una chiave      
 
-GROUP SIZE - Number of rows in the internal table for the particular group key.     
-GROUP INDEX - Index of the group from Main loop iteration.     
-REFERENCE INTO DATA - Assiging the group data into a seperate internal table to access inside the LOOP GROUP.    
-ASCENDING / DESCENDING - sort the groups by the group key in ascending or descending order before the group loop is executed.      
-WITHOUT MEMBERS - constructs groups but there is not access to the rows of the groups in the group loop. If the addition WITHOUT MEMBERS is specified.     
+This loop allows you to group a specific set of values in a loop according to a key.
+
+- GROUP SIZE - Number of rows in the internal table for the particular group key.
+
+- GROUP INDEX - Index of the group from Main loop iteration.
+
+- REFERENCE INTO DATA - Assigning the group data into a separate internal table to access inside the LOOP GROUP.
+
+- ASCENDING / DESCENDING - Sort the groups by the group key in ascending or descending order before the group loop is executed.
+
+- WITHOUT MEMBERS - Constructs groups but there is no access to the rows of the groups in the group loop. If the addition WITHOUT MEMBERS is specified.
 The addition WITHOUT MEMBERS is used to improve performance in all cases where the content of the groups is not required.
-LOOP AT GROUP. Group loop to access each row of the group.      
-Here is my sample code to understand LOOP AT with GROUP BY and some group features.      
+
+- LOOP AT GROUP. Group loop to access each row of the group.
+Here is my sample code to understand LOOP AT with GROUP BY and some group features.
 
 ```abap
 TYPES ty_t_mard TYPE SORTED TABLE OF mard WITH UNIQUE KEY matnr werks lgort.
@@ -403,7 +409,7 @@ LOOP AT lt_mard INTO DATA(wa_mard) GROUP BY ( matnr = wa_mard-matnr
 ENDLOOP.
 ```
 
-  **Contare righe secondo condizioni definite**
+  **Counting rows according to defined conditions**
  ```abap
   DATA(lv_lines) = REDUCE i(
       INIT x = 0
@@ -412,16 +418,16 @@ ENDLOOP.
     ).
 ```
 
- **Ottenere numero riga secondo condizioni definite**
+ **Getting row number according to defined conditions**
   ```abap
   DATA(lv_index) = line_index( lt_ihpavb[ parvw = 'AG' ] ).
   ```
   
-  **Ottenere numero righe tabella**
+  **Getting number of table rows**
   ```abap
   DATA(lv_index) = lines( lt_ihpavb ).
   ```
-Per poter ottenere la struttura di una tabella interna (nome e tipo delle colonne), è possibile utilizzare delle classi che aiutano l'estrazione di queste informazioni.
+To obtain the structure of an internal table (column name and type), you can use classes that help extract this information.
 
 ```abap
 
@@ -432,20 +438,19 @@ Per poter ottenere la struttura di una tabella interna (nome e tipo delle colonn
          ls_detail    LIKE LINE OF lt_detail,
          ls_c_compcd  TYPE idwtcompcd.
 
-  lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( istructure ). "Chiamare metodo statico su una struttura
+  lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( istructure ). "Call static method on a structure
   lt_detail[] = lo_ref_descr->components.
 
   LOOP AT lt_detail INTO ls_detail.
     ASSIGN COMPONENT ls_detail-name OF STRUCTURE istructure TO FIELD-SYMBOL(<ls_comp>).
-    "Qui ho le colonne della tabella
+    "Here I have the columns of the table
   ENDLOOP.
   
 ENDFORM.
   
 ```
-<h1>Eventi</h1>
-Capita si debba sollevare un evento in modo statico da codice (da una badi o da un'altro metodo). Si deve ricorrere quindi ad una classe
-standard per fare il RAISE.
+<h1>Events</h1>
+It happens that an event needs to be raised statically from code (from a BADI or another method). One must therefore resort to a standard class to RAISE it.
 
 ```abap
  DATA : lv_objtype          TYPE sibftypeid VALUE 'ZCL_UD_UPDATE_IDOC',
@@ -454,20 +459,20 @@ standard per fare il RAISE.
          wf_objkey           TYPE sweinstcou-objkey,
          lr_event_parameters TYPE REF TO if_swf_ifs_parameter_container.
 
-  " Chiamo il metodo della classe per ottenere un container dell'evento
+  " Call the class method to get an event container
   CALL METHOD cl_swf_evt_event=>get_event_container
     EXPORTING
       im_objcateg  = cl_swf_evt_event=>mc_objcateg_cl
       im_objtype   = lv_objtype
       im_event     = lv_event
     RECEIVING
-      re_reference = lr_event_parameters. " Parametri dell'evento che si vuole chiamare
+      re_reference = lr_event_parameters. " Parameters of the event to be called
 
-  " Setto i parametri dell'evento che voglio chiamare
+  " Set the parameters of the event I want to call
   TRY.
       lr_event_parameters->set(
         EXPORTING
-          name                          = 'I_LOTTO'
+          name                          = 'I_INSPL'
           value                         = new_insplot
       ).
 
@@ -480,7 +485,7 @@ standard per fare il RAISE.
     CATCH cx_swf_cnt_container.    "
   ENDTRY.
 
-  " Sollevo l'evento
+  " Raise the event
   try.
         call method cl_swf_evt_event=>raise_in_update_task
           exporting
@@ -495,13 +500,12 @@ standard per fare il RAISE.
 ```
 <br>
 <br>
-<b>Attenzione:</b><br>
-Il RAISE non è obbligatorio farlo scattare con il metodo <i>raise_in_update_task</i> ma dipende dal fattore di sincronizzazione del raise
-
+<b>Attention:</b><br>
+The RAISE is not strictly required to be triggered with the raise_in_update_task method, but it depends on the synchronization factor of the raise.
 
 <h1>JSON</h1>
 
-E' possibile utilizzare la classe */UI2/CL_JSON* per trasformare oggetti abap in json e viceversa.
+It's possible to use the /UI2/CL_JSON class to transform ABAP objects into JSON and vice versa.
 
 ```abap
 DATA: lt_flight TYPE STANDARD TABLE OF sflight,

@@ -1,33 +1,37 @@
-<b>SPAU E SPDD</b>
-Sono transazioni utilizzate per un aggiornamento pesante di pacchetti sap. Servono per aggiornare sia oggetti dictionary che programmi
-  attraverso la funzione di reset a standard o di modifica manuale, attraverso il quale si adatta l'oggetto modificato affinchè possa essere 
-  consistente e non dia problemi.
+**SPAU and SPDD**
 
-- SPDD</br>
-E' una transazione utilizzata in seguito ad un aggiornamento sistemistico. Serve per controllare la consistenza di oggetti a dictionary 
-e decidere se mantenerli o resettarli. Nel caso delle note di solito si resetta. Devono essere fatti TUTTI gli oggetti.
+These are transactions used for a major SAP package upgrade. They serve to update both dictionary objects and programs through either a "reset to standard" function or manual modification, which adapts the modified object to ensure it is consistent and doesn't cause issues.
 
-- SPAU</br>
-E' una transazione utilizzata per controllare la consistenza del codice custom. Come la spdd si può decidere se resettarlo o mantenerlo.
-Nella spau esistono 5/6 sezioni: 
+---
 
-  - Notes: Ti mostra tutte le note e ti chiede cosa vuoi farne -> selezioni tutto -> prepare notes (aggiorna tutte le note) 
-          ->se non funziona prepare notes seleziona tutte e cliccare su 'compute adjustment mode' 
+### SPDD
 
-  - with assistant: cose modificate con assistente -> se la modifica non è chiara bisogna CHIEDERE. 
-                  Una volta ripristinato o applicate le modifiche devono essere attivati i cambiamenti. 
-                  Reset se sono cambiamenti inutili (tipo testi delle note). Documentazione di solito si resetta.
+**SPDD** is a transaction used after a system upgrade. It checks the consistency of dictionary objects and allows you to decide whether to keep them or reset them. In the case of notes, they are usually reset. ALL objects must be processed.
 
-  - without assistan
+---
 
-  - deletion: delete modification log a quasi tutto (vedere le custom)
+### SPAU
 
-  - translations: farle passare tutte
+**SPAU** is a transaction used to check the consistency of custom code. Like SPDD, you can decide whether to reset it or keep it.
+In SPAU, there are 5/6 sections:
+
+* **Notes:** Shows all notes and asks what you want to do with them -> select all -> "Prepare Notes" (updates all notes) -> if "Prepare Notes" doesn't work, select all and click on "Compute adjustment mode."
+
+* **With Assistant:** Things modified with the assistant -> if the modification is unclear, you must ASK. Once restored or modifications applied, the changes must be activated. Reset if changes are useless (like note texts). Documentation is usually reset.
+
+* **Without Assistant**
+
+* **Deletion:** Delete modification log for almost everything (check custom objects).
+
+* **Translations:** Allow all of them to pass.
+
+---
 
 **NB**
-- Esiste la SPAU_ENH per il mantenimento degli enanchement
-- Fare sempre solo una CR per ogni transazione
-- tenere traccia delle cose fatte tramite un file in cui si segnano le modifiche
-- aggiornare in inglese con client 000
 
-<i>Vedere link esterni per approfondimenti</i>
+* There is **SPAU_ENH** for maintaining enhancements.
+* Always create only one CR (Change Request) per transaction.
+* Keep track of what's been done in a file where you log the modifications.
+* Perform updates in English, using client 000.
+
+*See external links for more details.*

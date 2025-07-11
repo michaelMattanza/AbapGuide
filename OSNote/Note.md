@@ -1,16 +1,14 @@
-<b>Installare le note</b>
-  
-Per installare le note occorre accedere al sistema in inglese. E' consigliato inoltre utilizzare un file excel di appoggio.
-<br>
-Una volta ottenuta la lista di note da installare, lanciare la transazione <i>SNOTE</i> ed effettuare i seguenti passi:
-- Segnare la nota da installare sul foglio excel
-- Controllare che sia compatibile con il sistema sul quale si sta installando
-- Controllare se servono dei prerequisiti, in tal caso installarli prima della nota
-- Controllare se ci sono delle attività manuali da fare (pre-implement o post-implement)
-- Procedere con l'installazione della nota
+# Installing SAP Notes
 
+To install SAP Notes, you should access the system in English. It's also recommended to use a supporting Excel file.
 
-**NB**<br>
-Alcuni prerequisiti o alcune attività manuali vengono specificate all'inizio della pagina, leggere bene il documento prima di procedere con
-l'installazione
-  
+Once you have the list of notes to install, launch transaction *SNOTE* and follow these steps:
+
+* Mark the note to be installed on your Excel sheet.
+* Check that it's compatible with the system you're installing it on.
+* Check for any prerequisites; if needed, install them before the main note.
+* Check for any manual activities required (pre-implementation or post-implementation).
+* Proceed with the note installation.
+
+**Note:**
+Some prerequisites or manual activities are specified at the beginning of the note's documentation. Read the document carefully before proceeding with the installation.

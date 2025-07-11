@@ -1,5 +1,5 @@
 <h1>BAPI_MATERIAL_STOCK_REQ_LIST</h1>     
-Bapi per l'estrazione delle quantità di stock disponibili e usate.    
+Bapi for extracting available and used stock quantities.  
 
 
 ```abap

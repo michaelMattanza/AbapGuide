@@ -1,5 +1,5 @@
 <h1>BAPI_CHARACT_GETDETAIL</h1>    
-Estrarre i dati di una caratteristica (descrizione, valori possibili, ecc...)
+Extract data from a characteristic (description, possible values, etc.)
 
 ```abap
 

@@ -1,5 +1,5 @@
 <h1>BAPI_MATERIAL_SAVEDATA</h1>    
-Modificare dati materiale
+Edit material data
 
 ```abap
 *"*"Local Interface:

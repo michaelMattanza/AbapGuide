@@ -1,114 +1,128 @@
-<h1>Idoc / EDI</h1>
+# IDoc / EDI
 
-Gli IDOC sono il mezzo di scambio dei dati all'interno dell'ale con una struttura riconducibile a un file XML. Un idoc è riconosciuto da: messaggio logico (nome identificativo), tipo base (che ne definisce i segmenti interni e a sua volta i campi) e un opzionale ampliamento. Possono essere inbound o outbound. In sap vengono salvati su DB su varie tabelle. Ogni segmento generato crea una struttura a dictionary. 
-Gli idoc inbound vengono elaborati da function module (collegato al process code) e wkf task.
+IDocs are the means of data exchange within ALE with a structure similar to an XML file. An IDoc is identified by: a logical message (identification name), a basic type (which defines its internal segments and, in turn, its fields), and an optional extension. They can be inbound or outbound. In SAP, they are saved to the database in various tables. Each generated segment creates a dictionary structure. Inbound IDocs are processed by function modules (linked to the process code) and workflow tasks.
 
-Gli idoc sono divisi in tre sezioni principali:
-- *Control record*: dati testata e instradamento
-- *Payload*: dati dell'oggetto
-- *Stati*: record riportanti dei cambi di stato
+IDocs are divided into three main sections:
+* **Control record**: Header and routing data
+* **Payload**: Object data
+* **Statuses**: Records indicating status changes
 
-La trasmissione di idoc può essere gestita alla creazione accordo partner e pò essere:   
-- trasmissione idoc immediata
-- trasmissione idoc tramite job
+The transmission of IDocs can be managed during partner agreement creation and can be:
+* Immediate IDoc transmission
+* IDoc transmission via job
 
-**Concetti di base**   
-*ALE*    
-ALE ( Application Link Enabling ) è una tecnologia sap per scambiare dati tra sap e un altro sistema (esterno oppure sap):
-- *Application Layer*: tool messi a disposizione tramite un'interfaccia.
-- *Distribution layer*: gestisce filtri e conversioni basate su regole custom. Possono anche essere conversioni di adattamento a sistemi di versioni differenti
-- *Communication Layer*: gestisce la comunicazione in modo sincrono/asincrono con gli altri sistemi. 
+## Basic Concepts
 
-*EDI*   
-Struttura utilizzata per lo scambio e la gestione tra fornitore e cliente di documenti elettronici secondo tracciati standard.
-I documenti scambiati tramite EDI hanno valenza cartacea.
+### ALE
 
-*Tipo messaggio*   
-Rappresenta il messaggio scambiato tra i sistemi ed è collegato al tipo idoc.
+ALE (**A**pplication **L**ink **E**nabling) is an SAP technology for exchanging data between SAP and another system (external or another SAP system):
+* **Application Layer**: Tools made available via an interface.
+* **Distribution Layer**: Manages filters and conversions based on custom rules. These can also be conversions for adapting to different system versions.
+* **Communication Layer**: Manages communication synchronously/asynchronously with other systems.
 
-*Variante messaggio*   
-Rappresenta step alternativi al messaggio originale in determinate condizioni.
+### EDI
 
-*Funzione messaggio*   
-Alternativa di un messaggio principale. Medesimo oggetto lavorato ma con qualcosa di differente (es. lingua diversa)
+A structure used for the exchange and management of electronic documents between supplier and customer according to standard formats. Documents exchanged via EDI have the same legal validity as paper documents.
 
-*Sistema logico*   
-Sistema che manda/riceve gli idoc
+### Message Type
 
-*Modello di distribuzione*   
-Il modello di distrbuzione definisce l'elenco dei messaggi logici che il sistema scambia con un determinato sistema logico. Ogni messaggio logico ha detrminati filtri che lo descrivono. 
+Represents the message exchanged between systems and is linked to the IDoc type.
 
-*Change pointer*   
-I change pointer servono per propagare una modifica fatta a sistema su oggetti di business. Intercettano modifiche dei dati che possiamo definire "a noi interessanti" in modo che venga propagata solo la modifica dei dati fondamentali.
+### Message Variant
 
-*Accordi partner*   
-Oggetto di customizing obbligatorio. Viene definito per ogni comunicazione punto-punto. E' come un contenitore in cui vengono specificati tutti i tipi messaggio scambiabili in entrata/uscita con un determinato destinatario.
-Serve definire l'instradamento di un determinato idoc inbound/outbound.
+Represents alternative steps to the original message under certain conditions.
 
-*Destinazione rfc*   
-Informazioni tecniche del sistema ricevente (ip + porta + info varie )
+### Message Function
 
-*Porta*   
-Rappresentazione di un canale di comunicazione (per idoc usare RFC)
+An alternative to a main message. The same object is processed but with something different (e.g., a different language).
 
-*Codice processo*   
-Codice che indica il functiom module o api da richiamare per il processo dell'idoc
+### Logical System
 
-**Configurare e ampliare un IDOC - Step by Step**   
- 
- - *SALE*   
-    - Andare in *Parametrizzazione di base > Installare sistemi logici > Denominare sistema logico* e inserire il nome del sistema logico.
+The system that sends/receives the IDocs.
 
- - *WE81*
-    - Aggiungere il tipo di messaggio che si vuole utilizzare per l'idoc
+### Distribution Model
 
- - *BD56*
-    - Aggiungere i segmenti che vuoi filtrare considerando mittente, destinatario e le loro rispettive categorie
+The distribution model defines the list of logical messages that the system exchanges with a specific logical system. Each logical message has certain filters that describe it.
 
- - *BD61*
-   - Attivare change pointers
+### Change Pointer
 
- - *BD50*
-    - Attivazione dei change pointers per il tipo di messaggio
+Change pointers are used to propagate a change made in the system to business objects. They intercept data modifications that we can define as "interesting to us" so that only the modification of key data is propagated.
 
- - *BD64*   
-    - Creare un sistema di distribuzione fittizio e aggiungere il filtro sul messaggio creato
+### Partner Agreements
 
- - *WE31*
-    - Creare il segmento custom che vuoi aggiungere al'idoc. Una volta creato il segmento impostarlo in tipo rilasciato.
+A mandatory customizing object. It is defined for each point-to-point communication. It's like a container where all the message types that can be exchanged inbound/outbound with a specific recipient are specified. It serves to define the routing of a specific inbound/outbound IDoc.
 
- - *WE30*
-    - Creare un ampliamento scegliendo il tipo base idoc da cui partire. Aggiungere poi il segmento custom creato tramite la we31 impostando l'obbligatorietà, il numero min/max del segmento e il livello. 
+### RFC Destination
 
- - *WE82*
-    - Inserire in questa view un record per collegare Tipo messaggio, tipo base dell'idoc, ampliamento, release ( inserire * )
+Technical information of the receiving system (IP + port + various info).
 
- - *BD60*
-    - Collegare al messaggio custom dell'idoc il messaggio di riferimento e il function module.
+### Port
 
- - *WE21*
-    - Creare porta per l'elaborazione dell'idoc ( solitamente RFC )
+Representation of a communication channel (for IDocs, use RFC).
 
- - *WE20*
-    - Creare un accordo partner per un determinato tipo. Inserire i dati relativi all'idoc tra i parametri di uscita/entrata
+### Process Code
 
- - *Codice*
-    - Implementare una function o una exit per inserire i dati e il segmento custom nell'idoc
+Code that indicates the function module or API to call for IDoc processing.
 
-**Creare IDOC da Change pointer**
-Lanciare il report RBDMIDOC da *SE38*. Inserendo il tipo messaggio, il report standard genererà n idoc in base alle modifiche tenute dai Change pointer in base ai record. Questo report accorpa gli idoc in base alla chiave: se è stato modificato più volte un oggetto verrà creato un solo idoc. 
+## Configure and Extend an IDoc - Step by Step
 
-**Tabelle fondamentali**
-- *Edidc*: Informazioni di testata 
-- *Edid4*: Payload. (potrebbe cambiare in base alla versione del sistema)
-- *Edids*: Record stati idoc 
+* **SALE**
+    * Go to *Basic Settings > Set up Logical Systems > Name Logical System* and enter the logical system name.
 
-**Transazioni**
-- *WE19*: Riprocessare Idoc in errore
-- *WE30*: Tipo base 
-- *WE05*: Visualizzare idoc scambiati 
-- *BD87*: Stato msg ale 
+* **WE81**
+    * Add the message type you want to use for the IDoc.
 
-**Idoc std**   
-*aleaud01*   
-Conferma idoc in entrata a sistema sender. Puoi impostare quali messaggio intercettare e per quali partner questo idoc può essere triggerato
+* **BD56**
+    * Add the segments you want to filter, considering sender, receiver, and their respective categories.
+
+* **BD61**
+    * Activate change pointers.
+
+* **BD50**
+    * Activate change pointers for the message type.
+
+* **BD64**
+    * Create a dummy distribution model and add the filter for the created message.
+
+* **WE31**
+    * Create the custom segment you want to add to the IDoc. Once created, set the segment as released.
+
+* **WE30**
+    * Create an extension by choosing the basic IDoc type to start from. Then add the custom segment created via WE31, setting its mandatory status, min/max number, and level.
+
+* **WE82**
+    * Insert a record in this view to link Message Type, IDoc basic type, extension, and release (enter `*`).
+
+* **BD60**
+    * Link the custom IDoc message to the reference message and the function module.
+
+* **WE21**
+    * Create a port for IDoc processing (usually RFC).
+
+* **WE20**
+    * Create a partner agreement for a specific type. Enter the IDoc-related data in the outbound/inbound parameters.
+
+* **Code**
+    * Implement a function or an exit to insert data and the custom segment into the IDoc.
+
+## Create IDoc from Change Pointer
+
+Run report **RBDMIDOC** from *SE38*. By entering the message type, the standard report will generate 'n' IDocs based on the changes captured by the Change Pointers according to the records. This report groups IDocs based on the key: if an object has been modified multiple times, only one IDoc will be created.
+
+## Key Tables
+
+* **Edidc**: Header information
+* **Edid4**: Payload (may vary depending on the system version)
+* **Edids**: IDoc status records
+
+## Transactions
+
+* **WE19**: Reprocess IDoc in error
+* **WE30**: Basic type
+* **WE05**: Display exchanged IDocs
+* **BD87**: ALE message status
+
+## Standard IDoc
+
+* **aleaud01**
+    Confirmation of inbound IDoc to sender system. You can set which messages to intercept and for which partners this IDoc can be triggered.

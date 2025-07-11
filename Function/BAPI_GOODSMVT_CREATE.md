@@ -1,5 +1,5 @@
 <h1>BAPI_GOODSMVT_CREATE</h1>
-Codice movimenti - GMCODE
+Movements code - GMCODE
  01 - MB01 - Goods Receipts for Purchase Order   
  02 - MB31 - Goods Receipts for Prod Order   
  03 - MB1A - Goods Issue   

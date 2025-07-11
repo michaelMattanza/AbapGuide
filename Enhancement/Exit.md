@@ -1,13 +1,19 @@
-<h1>Exit</h1>    
-Le exit sono messe a disposizione dalla sap per la modifica di un comportamento standard senza la modifica del codice sorgente. 
-Esistono vari tipi di exit ( tipo function, menu, screen, etc... ) attivabili tramite CMOD ( tcode del gruppo di exit ) ed SMOD ( tcode singola exit ). 
+# Exits
 
-*User exit*: La user exit è un include standard dove un utente può inserire del codice per modificare determinati dati di un flusso standard.    
-    
-*Customer exit*: è una function creata da sap per chiamare il codice custom in un flusso standard. Il codice va inserito nell'include che essa contiene ( quindi la user exit ).
+Exits are provided by SAP to allow modification of standard behavior without changing the source code. Various types of exits exist (such as function, menu, screen, etc.), which can be activated via **CMOD** (tcode for exit groups) and **SMOD** (tcode for individual exits).
 
-SXX: S standard exits della sap. 
-UXX: U user exits definite dagli utenti
+### User Exit
 
-Lista Exit:
-- EXIT_SAPLV56K_002 ( Exit Idoc DESADV - DELVRY07 )
+A **user exit** is a standard include where a user can insert code to modify specific data within a standard flow.
+
+---
+
+### Customer Exit
+
+A **customer exit** is a function created by SAP to call custom code within a standard flow. The code must be inserted into the include it contains (which is the user exit).
+
+**SXX:** Standard SAP exits.
+**UXX:** User exits defined by users.
+
+List of Exits:
+- EXIT_SAPLV56K_002 (Idoc DESADV - DELVRY07 Exit)

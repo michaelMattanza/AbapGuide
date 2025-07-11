@@ -1,4 +1,4 @@
-FM per la creazione di una fattura passiva senza riferimento ordine (FB60)
+FM for creating a passive factory without order return (FB60)
 
 ```abap 
 DATA: lt_accountgl TYPE TABLE OF BAPIACGL09,

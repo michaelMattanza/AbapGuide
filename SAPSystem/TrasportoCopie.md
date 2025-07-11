@@ -1,21 +1,25 @@
-<b>Trasporto copie</b><br>
-Per trasportare un oggetto su un altro sistema andare in <i>SE10</i> e creare una CR per il trasporto copie. Una volta creata selezionare
-il box Rilevare oggetti (ctrl + f11) e inserire ciò che vuoi trasportare. Dopo aver incluso gli oggetti, impostare destinazione virtuale
-VIR e rilasciarla.
-<br><br>
-<b>Download CR</b><br>
-Lanciare la transazione <i>CG3Y</i>.<br>
-Scaricare i file dai seguenti percorsi:
-- \\sapdev\sap\trans\data\R(numerocr).(idsistema) 
-- \\sapdev\sap\trans\cofiles\K(numerocr).(idsistema)
+**Transport of Copies**
 
-Questi file devono essere salvati con l'estensione (idsistema).
-<br><br>
-<b>Upload CR</b><br>
-Lanciare la transazione <i>CG3Z</i>.<br>
-Caricare i file R(numerocr).(idsistema) e K(numerocr).(idsistema) rispettivamente nelle cartelle data e cofiles del sistema d'arrivo.
-Una volta importati i file lanciare la transazione <i>STMS</i>, selezionare il sistema di dev e selezionare <i>Opzioni > Altre richieste >  Aggiungi</i>. Cercare la propria CR che sarà nominata (idsistema di provenienza)(K)(numerocr di provenienza). Selezionarla e importarla.
-<br><br>
-> NB<br>
-I percorsi non sono gli stessi per ogni sistema. Cercare la cartella <i>TRANS</i> tramite la transazione <i>AL11</i> per risalire alle 
-due cartelle contenenti i file utili (data e cofiles).
+To transport an object to another system, go to *SE10* and create a CR (Change Request) for a "transport of copies." Once created, select the "Include Objects" box (Ctrl + F11) and enter what you want to transport. After including the objects, set the virtual destination to **VIR** and release it.
+
+---
+
+**Download CR**
+
+Launch transaction *CG3Y*.
+Download the files from the following paths:
+* \\sapdev\sap\trans\data\R(cr_number).(system_id)
+* \\sapdev\sap\trans\cofiles\K(cr_number).(system_id)
+
+These files must be saved with the extension (system_id).
+
+---
+
+**Upload CR**
+
+Launch transaction *CG3Z*.
+Upload the R(cr_number).(system_id) and K(cr_number).(system_id) files into the `data` and `cofiles` folders, respectively, of the target system.
+Once the files are imported, launch transaction *STMS*, select the development system, and choose *Options > Other requests > Add*. Search for your CR, which will be named (source_system_id)(K)(source_cr_number). Select it and import it.
+
+> **NB**
+> The paths are not the same for every system. Find the *TRANS* folder using transaction *AL11* to locate the two relevant folders (`data` and `cofiles`).

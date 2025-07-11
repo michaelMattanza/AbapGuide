@@ -1,10 +1,8 @@
-**Badi**    
+**BAdI**
 
-Le Badi (Business ADD-INS) sono classi OO dove è possibile aggiungere codice personalizzato, in metodi appropriati, 
-che sono chiamati da codice standard. La caratteristica principale di una BAdI è che fornisce un meccanismo per modificare 
-la funzionalità di una funzione aziendale ben definita (ad esempio un BAPI) senza apportare modifiche al codice sorgente.
+BAdIs (Business ADD-INs) are OO classes where it is possible to add custom code, in appropriate methods, which are called by standard code. The main characteristic of a BAdI is that it provides a mechanism to modify the functionality of a well-defined business function (e.g., a BAPI) without making changes to the source code.
 
-Per creare la propria implementazione utilizzare la transazione *SE18*.
+To create your own implementation, use transaction *SE18*.
 
-Lista Badi:
-- ME_PROCESS_PO_CUST ( processo Ordine d'acquisto )
+List of BAdIs:
+- ME_PROCESS_PO_CUST ( Purchase Order process )

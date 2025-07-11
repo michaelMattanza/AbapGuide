@@ -1,24 +1,28 @@
-<h1>WKF SAP</h1>
+# SAP Workflows
 
-I workflow sono una serie di passi svolti per compiere un'azione complessa ( documento, informazione, ecc... ).   
-Il primo passo è creare un metodo per ogni step che il wkf deve fare. E' consigliato creare una classe per ogni wkf in modo che ogni implementazione sia a se stante.    
-Inserire nella classe un evento che sarà il trigger del wkf con i parametri da passare al contenitore del wkf stesso.
+**Workflows** are a series of steps performed to accomplish a complex action (document, information, etc.).
+The first step is to create a method for each step the workflow needs to perform. It's recommended to create a class for each workflow so that each implementation is self-contained.
+In the class, insert an **event** that will be the workflow's trigger, along with the parameters to be passed to the workflow's container.
 
-Una volta creati i metodi, andare in *PFTC* e creare un Task Workflow (TS) al quale legare il metodo creato.   
-Selezionare quindi la categoria oggetto Classe, legare il metodo creato, fare il binding del contenitore con i parametri del metodo ed infine flaggare la voce "Metodo oggetto sincrono".
+Once the methods are created, go to *PFTC* and create a **Workflow Task (TS)** to link the created method.
+Then select the object category **Class**, link the created method, perform the **binding of the container** with the method's parameters, and finally check the "Synchronous object method" option.
 
-Una volta creato un task per ogni step del wkf, creare un Modello wkf nuovo (sempre da *PFTC*, tipo WS).   
-Nella sezione di trigger del wkf inserire la classe e l'evento sopra citato.   
-Andare quindi nella sezione del wkf builder e aggiungere il nodo attività: indicare quindi nella voce Task: TS + num. task creato. Attenzione: se viene utilizzato il nodo blocco devono essere passati dei parametri appositi oppure il workflow verrà interrotto.   
-Impostare quindi i dati di passaggio cliccando sul bottone "Flusso di dati", creando nel container del wkf le variabili che dovete lavorare.
+After creating a task for each workflow step, create a new **Workflow Model** (also from *PFTC*, type WS).
+In the workflow trigger section, insert the class and event mentioned above.
+Then go to the **workflow builder** section and add the activity node: indicate in the Task field: **TS + created task number**. Caution: if the block node is used, specific parameters must be passed, otherwise the workflow will be interrupted.
+Then set the passing data by clicking on the "Data Flow" button, creating the variables you need to work with in the workflow container.
 
-**Chiamare un wkf**   
-Creare nella classe un metodo che fa il raise del wkf.   
+---
+
+**Calling a Workflow**
+
+Create a method in the class that raises the workflow.
+
 ```abap
   method RAISE_WKF.
     " WS 900000000
-     CONSTANTS: lc_objtype TYPE sibftypeid VALUE '', " Classe che contiene l'evento del wkf
-                lc_event   TYPE sibfevent  VALUE ''. " Nome dell'evento che avvia il wkf
+      CONSTANTS: lc_objtype TYPE sibftypeid VALUE '', " Class that contains the workflow event
+                 lc_event   TYPE sibfevent  VALUE ''. " Name of the event that starts the workflow
 
     DATA: lv_param_name       TYPE swfdname,
           lv_objkey           TYPE sweinstcou-objkey,
@@ -31,7 +35,7 @@ Creare nella classe un metodo che fa il raise del wkf.
             im_objtype   = lc_objtype
             im_event     = lc_event
           RECEIVING
-            re_reference = lref_event_parameters.
+            re_reference = lref_event_parameters. " Parameters of the event to be called
 
         lref_event_parameters->set( EXPORTING name = 'CT_MSEG' value = it_mseg ).
 
@@ -56,5 +60,3 @@ Creare nella classe un metodo che fa il raise del wkf.
     ENDTRY.
     COMMIT WORK.
   endmethod.
-```
-

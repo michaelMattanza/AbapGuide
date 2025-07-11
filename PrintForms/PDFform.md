@@ -1,23 +1,32 @@
-**Interfaccia**</br>
-Nell'interfaccia vengono dichiarate le variabili di passaggio tra il report e il modulo. Qui, le variabili possono essere ulteriormente lavorate (meglio di no) per passare dati diversi da quelli provenienti dal report.
+**Interface**
 
-**Modulo** </br>
-Il modulo della stampa PDF contiene il layout grafico che consente, tramite moduli e oggetti, di creare un documento organizzato con le variabili ricevute dall'interfaccia. Le variabili vengono connesse quindi agli oggetti attraverso il binding. 
-Nel modulo è possibile inserire degli script in javascript e formcalc (fortemente sconsigliati, funzionano male e sono di difficile gestione). Nella sezione di passaggio variabili dall'interfaccia al modulo possono essere disattivate le variabili non utilizzate. E' inoltre possibile utilizzare "oggetti" specifici (tipo l'oggetto indirizzo) per delle formattazioni specifiche di determinate informazioni
-- Logo
-  - https://blogs.sap.com/2014/06/09/how-to-place-an-se78-image-on-an-adobe-form/
-  
-Quando si aggiunge il logo inserire nel tipo MIME <i>'IMAGE/BMP'<i/>.
-  
-Lo script più utilizzato è quello che permette di nascondere i campi se non sono valorizzati. Posizionarsi sul campo da condizionare e impostare la voce dello script su <i>Initialize</i> con linguaggio <i>FormCalc</i> eseguito su <i>Client:</i>
+In the **interface**, variables are declared for passing data between the report and the form. Here, variables can be further processed (though it's generally not recommended) to pass data different from what originated in the report.
 
-Nel caso la stampa non parta ma non venga creato un dump allora seguire i passi nel link sottostante per debuggare la stampa:
- - https://blogs.sap.com/2017/11/29/usage-and-system-error-in-sap-adobe-forms/
+---
 
-**Esempi di script**</br>
-Gli script FormCalc vengono eseguiti solitamente sull'evento *Initialize* eseguito su *Server*.</br>
-Gli script Javascript qui riportati vengono invece usati sull'evento *Form:ready* eseguito su *Client*.
-FormCalc
+**Form**
+
+The **PDF form** contains the graphical layout which, through modules and objects, allows for the creation of a document organized with variables received from the interface. The variables are then connected to the objects through **binding**.
+Scripts in JavaScript and FormCalc can be inserted into the form (strongly discouraged, as they function poorly and are difficult to manage). In the section for passing variables from the interface to the form, unused variables can be deactivated. It's also possible to use specific "objects" (like the address object) for specific formatting of certain information.
+* Logo
+  * https://blogs.sap.com/2014/06/09/how-to-place-an-se78-image-on-an-adobe-form/
+
+When adding the logo, set the MIME type to *'IMAGE/BMP'*.
+
+The most commonly used script is one that allows hiding fields if they are not populated. Position yourself on the field to be conditioned and set the script's event to *Initialize* with the language *FormCalc* executed on the *Client:*
+
+If the print output doesn't start but no dump is created, follow the steps in the link below to debug the print:
+* https://blogs.sap.com/2017/11/29/usage-and-system-error-in-sap-adobe-forms/
+
+---
+
+**Script Examples**
+
+FormCalc scripts are usually executed on the *Initialize* event, run on the *Server*.
+The JavaScript scripts shown here, however, are used on the *Form:ready* event, run on the *Client*.
+
+### FormCalc
+
 ```FormCalc
 if ($ eq null) then
 $.presence = "hidden"
@@ -31,16 +40,16 @@ if( this.rawValue == "" ){
 }
 ```
 
-Nel caso si voglia impostare la condizione sul modulo contenente il dato:
+Setting the condition on the module containing the data:
 
 FormCalc
 ```FormCalc
-/*Scirpt sul campo*/
+/*Script on the field*/
 if ($ eq null) then
 $.parent.presence = "hidden"
 endif
 
-/*Scirpt sul modulo padre*/
+/*Script on the parent module*/
 if($.ZZFLAG == "X") then
 	$.presence = "hidden"
 endif
@@ -48,21 +57,21 @@ endif
 
 Javascript
 ```Javascript
-/*Script sul campo*/
+/*Script on the field*/
 if( this.rawValue == "" ){
 	zzmodule.presence = "hidden";
 }
 ```
     
 **Report**</br>
-Nel report viene inserito il codice di estrazione e lavorazione dei dati. Una volta lavorati i dati vengono chiamate le function di open e close job.
+The report contains the code for data extraction and processing. Once the data is processed, the open and close job functions are called.
 
  ```abap
   DATA: lv_fm_name   TYPE rs38l_fnam,
         ls_outpar    TYPE sfpoutputparams,
         lv_xstring   TYPE xstring.
         
- " Ottengo il logo per l'etichetta
+    " Get the logo for the label
     CALL METHOD cl_ssf_xsf_utilities=>get_bds_graphic_as_bmp
       EXPORTING
         p_object       = 'GRAPHICS'
@@ -76,11 +85,11 @@ Nel report viene inserito il codice di estrazione e lavorazione dei dati. Una vo
         internal_error = 2
         OTHERS         = 3.
         
-    " Provo a leggere il nome del function module
+    " Try to read the function module name
     TRY .
         CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
           EXPORTING
-            i_name     = 'ZFM_NOME'
+            i_name     = 'ZFM_NAME'
           IMPORTING
             e_funcname = lv_fm_name.
 
@@ -98,8 +107,8 @@ Nel report viene inserito il codice di estrazione e lavorazione dei dati. Una vo
 
     CALL FUNCTION lv_fm_name
       EXPORTING
-        is_printdata   = ls_printdata " Struttura che passo
-        ix_logo        = lv_xstring " Logo che passo
+        is_printdata   = ls_printdata " Structure to pass
+        ix_logo        = lv_xstring " Logo to pass
       EXCEPTIONS
         usage_error    = 1
         system_error   = 2
@@ -115,10 +124,10 @@ Nel report viene inserito il codice di estrazione e lavorazione dei dati. Una vo
         OTHERS         = 4.
  ```
  
-La stampa viene lanciata con un messaggio specifico. I vari dati di questo messaggio sono contenuti nella struttura <i>NAST</i>.
+The print is triggered with a specific message. The various data for this message are contained in the structure <i>NAST</i>.
 
 
-**Mandare una stampa tramite mail ( n. allegati pdf )**
+**Sending a print via email (N PDF attachments)**
 
  ```abap
  DATA:
@@ -160,7 +169,7 @@ La stampa viene lanciata con un messaggio specifico. I vari dati di questo messa
 
 
     TRY.
-        " Allego stampa
+        " Attach print
         lo_send_request = cl_bcs=>create_persistent( ).
         lo_pdf_content = cl_bcs_convert=>xstring_to_solix( iv_xstring = ls_output-pdf ).
 
@@ -170,7 +179,7 @@ La stampa viene lanciata con un messaggio specifico. I vari dati di questo messa
                         i_type    = CONV so_obj_tp('PDF')
                         i_hex    = lo_pdf_content
                         i_length = lv_size
-                        i_subject = CONV so_obj_des( |Lista Entrato Giornaliero| )
+                        i_subject = CONV so_obj_des( |Mail Object| )
                    ).
 
         lo_send_request->set_document( lo_document ).
