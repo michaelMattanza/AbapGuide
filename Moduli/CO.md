@@ -1,10 +1,12 @@
-SAP CO    
-Il modulo SAP CO Controllo di Gestione è costituito da cinque elementi: centri di costo, profit center, ordini interni, costo del prodotto e analisi di profittabilità. nel modulo SAP CO Controllo di Gestione convoglieranno i dati di contabilità.
-        
-Il modulo SAP CO Controllo di Gestione è nello specifico organizzato in sottomoduli.
-	CCA (Contabilità per Centri di Costo): comprende le voci di costo, il piano dei centri di costo, il budget e le tariffe delle attività.
-	PCA (Contabilità per Centri di Profitto):  comprende il piano dei profit center, la pianificazione e le allocazioni
-	ABC (Activity Based Costing): riguarda l’ anagrafica dei processi, la pianificazione e l’allocazione
-	PA (Profitability Analysis): comprende l’analisi di profittabilità e la segmentazione del business
-	OPA (Contabilità per Commesse): comprende la pianificazione delle commesse e l’allocazione dei costi di commessa
-	PC (Product Costing): è costituito dagli oggetti di costo e dalla pianificazione. Permette di stabile il costo unitario di prodotto
+# SAP CO
+
+The **SAP CO Controlling** module consists of five elements: cost centers, profit centers, internal orders, product cost, and profitability analysis. Accounting data will flow into the SAP CO Controlling module.
+
+The SAP CO Controlling module is specifically organized into sub-modules:
+* **CCA (Cost Center Accounting):** includes cost elements, the cost center master data, budgeting, and activity rates.
+* **PCA (Profit Center Accounting):** includes profit center planning, planning, and allocations.
+* **ABC (Activity Based Costing):** deals with process master data, planning, and allocation.
+* **PA (Profitability Analysis):** includes profitability analysis and business segmentation.
+* **OPA (Internal Orders Accounting):** includes internal order planning and internal order cost allocation.
+* **PC (Product Costing):** consists of cost objects and planning. It allows for the determination of the unit cost of a product.
+
