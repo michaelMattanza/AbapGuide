@@ -1,4 +1,4 @@
-# ABAP RESTful Application Programming Model (RAP) — Complete Guide
+# ABAP RESTful Application Programming Model (RAP) — Complete Guide (Mermaid-safe)
 
 > **Purpose**: A comprehensive developer-focused reference to build and operate RAP business objects with proper **transactions**, **draft handling**, **validations & determinations**, **EML**, and a clear **RAP vs BOPF** comparison. Includes copy‑pasteable ABAP snippets and **Mermaid** diagrams.
 
@@ -27,7 +27,7 @@ The **ABAP RESTful Application Programming Model (RAP)** is SAP’s modern, clou
 ## Key Features
 - **End‑to‑end**: CDS → Behavior → Service → Fiori/Web API
 - **Transactional**: Atomic save sequence with validations, determinations, actions
-- **Draft handling**: Edit/Activate/Discard/Resume/Prepare built‑in
+- **Draft handling**: Edit / Activate / Discard / Resume / Prepare built‑in
 - **Cloud‑ready**: Alignment with **ABAP Cloud** concepts and whitelisted APIs
 - **Typed access**: **EML** for direct ABAP access to RAP BOs
 - **OData V2/V4**: Service binding supports both (V4 brings modern features)
@@ -39,9 +39,9 @@ The **ABAP RESTful Application Programming Model (RAP)** is SAP’s modern, clou
 | Layer | Artifact | Purpose |
 |---|---|---|
 | Data | **DB tables** | Persistency |
-| Domain | **CDS view entities** | Semantic model & projections |
-| Behavior | **Behavior definition & Pool** | Declare & implement CRUD, validations, determinations, actions, draft |
-| Exposure | **Service definition & binding** | Publish as OData V2/V4 |
+| Domain | **CDS view entities** | Semantic model and projections |
+| Behavior | **Behavior definition and Pool** | Declare and implement CRUD, validations, determinations, actions, draft |
+| Exposure | **Service definition and binding** | Publish as OData V2/V4 |
 | Programmatic | **EML** | Typed ABAP access for read/modify/commit |
 
 #### RAP High‑Level Architecture (Mermaid)
@@ -52,13 +52,12 @@ flowchart LR
   end
   subgraph ABAP[ABAP Layer]
     CDS[CDS View Entities]
-    BEH[Behavior Definition & Pool
-(Validations, Determinations, Actions)]
-    EML[EML (READ/MODIFY/COMMIT)]
+    BEH[Behavior Definition and Pool\nValidations, Determinations, Actions]
+    EML[EML – READ/MODIFY/COMMIT]
   end
   subgraph SVC[Service Layer]
     SDEF[Service Definition]
-    SBND[Service Binding (OData V2/V4)]
+    SBND[Service Binding – OData V2/V4]
   end
   subgraph UI[Client]
     FIORI[Fiori Elements / Web API]
@@ -71,8 +70,9 @@ flowchart LR
 ```
 
 ---
+
 ## Transactions, Drafts & Concurrency
-- **Transactional Buffer & Save Sequence**: Changes live in a buffer. `COMMIT ENTITIES` runs **Validations → Determinations → Actions → Persist** atomically.
+- **Transactional Buffer and Save Sequence**: Changes live in a buffer. `COMMIT ENTITIES` runs **Validations → Determinations → Actions → Persist** atomically.
 - **Draft Handling**: Enable **`with draft`** and get built‑in actions: **Edit**, **Activate** (optimized variant available), **Discard**, **Resume**, and **Prepare**.
 - **Optimistic Locking / ETags**: Define **`etag master ...`** in BDEF and use **lock master** to protect the lockable subtree.
 
@@ -86,31 +86,32 @@ sequenceDiagram
 
   C->>R: MODIFY ENTITIES
   C->>R: COMMIT ENTITIES
-  R->>H: Run Validations (on save)
-  H-->>R: Messages/Failures
-  R->>H: Run Determinations
-  H-->>R: Derived Values
-  R->>H: Execute Actions (if any)
+  R->>H: Run validations on save
+  H-->>R: Messages / failures
+  R->>H: Run determinations
+  H-->>R: Derived values
+  R->>H: Execute actions (if any)
   R->>DB: Persist atomically
   DB-->>R: OK
-  R-->>C: Reported/Failed, ETags
+  R-->>C: Reported / Failed, ETags
 ```
 
 ---
 
 ## Technical Building Blocks
-- **Behavior Definition (BDEF)**: Declares operations, field control, **validations/determinations**, **actions**, draft, locking, and **ETag**.
+- **Behavior Definition (BDEF)**: Declares operations, field control, validations/determinations, actions, draft, locking, and ETag.
 - **Behavior Pool (ABP)**: Implements handler methods; can use EML and `IN LOCAL MODE` when called from within the same pool (develop scenario).
 - **Service Definition/Binding**: Clean separation of model vs exposure; supports OData V2/V4.
 
 ---
 
 ## Managed vs Unmanaged Implementation
-- **Managed**: Framework handles CRUD & save; ideal for greenfield—focus on business logic via determinations/validations/actions.
-- **Unmanaged**: You implement CRUD/save yourself (e.g., wrap legacy BAPIs); ideal for brownfield.
+- **Managed**: Framework handles CRUD and save; ideal for greenfield—focus on business logic via determinations/validations/actions.
+- **Unmanaged**: You implement CRUD/save yourself (for example, wrap legacy BAPIs); ideal for brownfield.
 - **Feature availability**: RAP adds OData V4 and modern draft features; see SAP’s matrix comparing RAP, BOPF, and Gateway.
 
 ---
+
 ## Validations & Determinations (Code)
 Below shows a **managed + draft** root entity `ZI_Book` with a validation and a determination.
 
@@ -213,6 +214,7 @@ MODIFY ENTITIES OF ZI_Book
 ```
 
 ---
+
 ## Authorization & Access Control
 - In CDS: `@AccessControl.authorizationCheck: #CHECK` + DCL to restrict access.
 - In BDEF: `authorization master ( instance )`; for drafts, apply feature control to `Edit` when needed.
@@ -223,7 +225,7 @@ MODIFY ENTITIES OF ZI_Book
 ## RAP vs BOPF (Comparison)
 | Aspect | RAP | BOPF / ABAP Programming Model for Fiori |
 |---|---|---|
-| Service Exposure | **Service Definition + Binding** (OData V2/V4) | Mostly OData V2 via Gateway |
+| Service Exposure | **Service Definition and Binding** (OData V2/V4) | Mostly OData V2 via Gateway |
 | Transaction Engine | Managed runtime + **EML**, built‑in **draft** | BOPF engine; draft via Fiori programming model |
 | Programming Model | **CDS View Entities + Behavior (BDEF/ABP)** | **CDS + BOPF BO** + generated artifacts |
 | Cloud Readiness | Part of **ABAP Cloud**; whitelisted APIs | Pre‑cloud; migrate to align |
@@ -283,6 +285,7 @@ define service ZUI_BOOK {
 > Bind `ZUI_BOOK` to **OData V4** in Service Binding to generate a Fiori elements UI quickly.
 
 ---
+
 ## References
 - **ABAP RAP – Help Portal (ABAP Cloud)** — https://help.sap.com/docs/abap-cloud/abap-rap/abap-restful-application-programming-model
 - **Learn (Design/Runtime views)** — https://help.sap.com/docs/abap-cloud/abap-rap/learn
@@ -297,4 +300,4 @@ define service ZUI_BOOK {
 
 ---
 
-> **Usage**: This file keeps Markdown formatting so diagrams and code render nicely on GitHub/GitLab or VS Code with Mermaid enabled. For platforms that don’t support Mermaid, copy the diagram blocks into a Mermaid live editor to export PNG/SVG.
+> **Note**: Mermaid flowcharts in GitHub do not allow HTML entities like `&amp;` or `<br/>` inside node labels. Use plain text, hyphens, or `\n` for line breaks as shown above.
