@@ -1,5 +1,5 @@
 ```abap
-CLASS zreg_cl_excel_manager DEFINITION
+CLASS zcl_excel_manager DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -50,7 +50,7 @@ ENDCLASS.
 
 
 
-CLASS zreg_cl_excel_manager IMPLEMENTATION.
+CLASS zcl_excel_manager IMPLEMENTATION.
 
   METHOD create_excel_from_table.
     DATA(lref_excel_data) = REF #( ct_table ).
