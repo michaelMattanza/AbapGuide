@@ -796,8 +796,8 @@ ENDMETHOD.
 * <SIGNATURE>---------------------------------------------------------------------------------------+
 * | Instance Private Method ZCL_ALV_MANAGER->HANDLE_TOOLBAR
 * +-------------------------------------------------------------------------------------------------+
-* | [--->] E_OBJECT                       LIKE
-* | [--->] E_INTERACTIVE                  LIKE
+* | [--->] E_OBJECT                       LIKE CL_ALV_EVENT_TOOLBAR_SET
+* | [--->] E_INTERACTIVE                  LIKE CHAR01
 * +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD handle_toolbar.
     PERFORM handle_toolbar IN PROGRAM (gv_program_name) IF FOUND USING e_object e_interactive.
