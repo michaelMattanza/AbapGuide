@@ -1,994 +1,624 @@
-class ZCL_ALV_MANAGER definition
-  public
-  create public .
+CLASS zcl_alv_manager DEFINITION
+  PUBLIC
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
+    " Simple helper types
+    TYPES ty_string_tab       TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+    TYPES ty_salv_colname     TYPE c LENGTH 30.
+    TYPES ty_fieldname_range  TYPE RANGE OF dd03l-fieldname.
 
-  types:
-    BEGIN OF ty_fc_custom,
-        fieldname    TYPE char255,
-        fc_component TYPE char255,
-        value        TYPE char255,
-      END OF ty_fc_custom .
-  types:
-    tty_fc_custom TYPE TABLE OF ty_fc_custom .
-  types:
-    BEGIN OF ty_fc_popup,
-            col_name TYPE lvc_fname,
-            out_len  TYPE lvc_outlen,
-            long_txt TYPE scrtext_l,
-         END OF ty_fc_popup .
-  types:
-    tyt_fc_popup TYPE TABLE OF ty_fc_popup .
+    " Customizations and SALV popup metadata
+    TYPES:
+      BEGIN OF ty_fc_custom,
+        fieldname    TYPE string,
+        fc_component TYPE string,
+        value        TYPE string,
+      END OF ty_fc_custom,
+      tty_fc_custom TYPE STANDARD TABLE OF ty_fc_custom WITH EMPTY KEY,
 
-  data GO_ALV type ref to CL_GUI_ALV_GRID .
-  data GO_SECOND_ALV type ref to CL_GUI_ALV_GRID .
-  data GV_PROGRAM_NAME type STRING .
-  data GT_FCAT type LVC_T_FCAT .
-  data GT_SECOND_FCAT type LVC_T_FCAT .
-  data GT_F4 type LVC_T_F4 .
-  data GT_SECOND_F4 type LVC_T_F4 .
+      BEGIN OF ty_fc_popup,
+        col_name TYPE ty_salv_colname,
+        out_len  TYPE lvc_outlen,
+        long_txt TYPE scrtext_l,
+      END OF ty_fc_popup,
+      tyt_fc_popup TYPE STANDARD TABLE OF ty_fc_popup WITH EMPTY KEY.
 
-  methods CONSTRUCTOR
-    importing
-      value(IV_PROGRAM_NAME) type STRING
-      value(IV_CDS_NAME) type STRING optional
-      value(IV_CHARACT_FC) type FLAG optional
-      value(IT_OUTTAB) type ANY
-      value(IO_ALV) type ref to CL_GUI_ALV_GRID optional
-      value(IT_CUSTOM_FC) type TTY_FC_CUSTOM optional .
-  methods GET_FCAT
-    returning
-      value(RT_FCAT) type LVC_T_FCAT .
-  methods SET_SECOND_TABLE
-    importing
-      value(IT_OUTTAB) type ANY
-      value(IT_CUSTOM_FC) type TTY_FC_CUSTOM optional
-      value(IV_CDS_NAME) type STRING optional
-      value(IV_CHARACT_FC) type FLAG optional .
-  methods DISPLAY_DATA
-    importing
-      value(IS_VARIANT_FT) type DISVARIANT optional
-      value(IV_SAVE_FT) type CHAR01 default 'A'
-      value(IS_LAYOUT_FT) type LVC_S_LAYO optional
-      value(IS_VARIANT_ST) type DISVARIANT optional
-      value(IV_SAVE_ST) type CHAR01 optional
-      value(IS_LAYOUT_ST) type LVC_S_LAYO optional
-      value(IV_VERTICAL) type FLAG optional .
-  class-methods DISPLAY_DATA_POPUP
-    importing
-      value(I_START_COLUMN) type I default 25
-      value(I_START_LINE) type I default 6
-      value(I_END_COLUMN) type I default 100
-      value(I_END_LINE) type I default 10
-      value(IT_DATA) type STANDARD TABLE
-      value(IT_FC) type TYT_FC_POPUP optional
-      !IV_SHOW_HEADER type ABAP_BOOL optional .
-  methods GET_OUTPUT_TABLES
-    exporting
-      !ET_TABLE_FT type ref to DATA
-      !ET_TABLE_ST type ref to DATA .
-  methods UPDATE_TABLES
-    importing
-      value(IT_TABLE_FT) type DATA optional
-      value(IT_TABLE_ST) type DATA optional .
-  methods SET_REGISTER_FLD_FIRST_ALV
-    importing
-      value(IT_F4) type LVC_T_F4 .
-  methods SET_REGISTER_FLD_SECOND_ALV
-    importing
-      value(IT_F4) type LVC_T_F4 .
-  methods SET_DROP_DOWN_TABLE_FIRST_ALV
-    importing
-      value(IT_DROP_DOWN) type LVC_T_DROP optional
-      value(IT_DROP_DOWN_ALIAS) type LVC_T_DRAL optional .
-  methods SET_DROP_DOWN_TABLE_SECOND_ALV
-    importing
-      value(IT_DROP_DOWN) type LVC_T_DROP optional
-      value(IT_DROP_DOWN_ALIAS) type LVC_T_DRAL optional .
+    " Factory: Note the CHANGING parameter for the table
+    CLASS-METHODS create
+      IMPORTING iv_program_name TYPE string
+                io_alv          TYPE REF TO cl_gui_alv_grid OPTIONAL
+                io_parent       TYPE REF TO cl_gui_container OPTIONAL
+                it_custom_fc    TYPE tty_fc_custom OPTIONAL
+      CHANGING  ct_outtab       TYPE ANY TABLE
+      RETURNING VALUE(ro_manager) TYPE REF TO zcl_alv_manager.
+
+    " Constructor: Accepts a raw Reference to Data
+    METHODS constructor
+      IMPORTING iv_program_name TYPE string
+                ir_outtab       TYPE REF TO data
+                io_alv          TYPE REF TO cl_gui_alv_grid OPTIONAL
+                io_parent       TYPE REF TO cl_gui_container OPTIONAL
+                it_custom_fc    TYPE tty_fc_custom OPTIONAL.
+
+    " Bind by screen custom control name
+    METHODS set_container_name
+      IMPORTING iv_container_name TYPE scrfname.
+
+    METHODS set_event_handler
+      IMPORTING io_handler TYPE REF TO zif_alv_event_handler.
+
+    METHODS get_fcat
+      RETURNING VALUE(rt_fcat) TYPE lvc_t_fcat.
+
+    " Display single ALV
+    METHODS display_data
+      IMPORTING is_variant_ft TYPE disvariant OPTIONAL
+                iv_save_ft    TYPE char01 DEFAULT 'A'
+                is_layout_ft  TYPE lvc_s_layo OPTIONAL.
+
+    " SALV popup
+    CLASS-METHODS display_data_popup
+      IMPORTING i_start_column TYPE i DEFAULT 25
+                i_start_line   TYPE i DEFAULT 6
+                i_end_column   TYPE i DEFAULT 100
+                i_end_line     TYPE i DEFAULT 10
+                it_fc          TYPE tyt_fc_popup OPTIONAL
+                iv_show_header TYPE abap_bool OPTIONAL
+      CHANGING  ct_data        TYPE ANY TABLE.
+
+    " Table ref access + refresh
+    METHODS get_output_table
+      RETURNING VALUE(er_table) TYPE REF TO data.
+
+    METHODS update_table
+      IMPORTING it_table TYPE data OPTIONAL.
+
+    " Field help & drop-downs
+    METHODS set_register_fld
+      IMPORTING it_f4 TYPE lvc_t_f4.
+
+    METHODS set_drop_down_table
+      IMPORTING it_drop_down       TYPE lvc_t_drop OPTIONAL
+                it_drop_down_alias TYPE lvc_t_dral OPTIONAL.
+
+    " Helpers using RANGE type
+    METHODS set_editable_columns
+      IMPORTING it_fields_rng TYPE ty_fieldname_range
+      CHANGING  ct_fcat       TYPE lvc_t_fcat OPTIONAL.
+
+    METHODS set_sum_columns
+      IMPORTING it_fields_rng TYPE ty_fieldname_range
+      CHANGING  ct_fcat       TYPE lvc_t_fcat OPTIONAL.
+
+    METHODS set_checkbox_columns
+      IMPORTING it_fields_rng TYPE ty_fieldname_range
+      CHANGING  ct_fcat       TYPE lvc_t_fcat OPTIONAL.
+
   PROTECTED SECTION.
-    DATA gref_outtab TYPE REF TO data .
-    DATA gref_second_outtab TYPE REF TO data .
+    DATA gref_outtab       TYPE REF TO data.
+    DATA go_alv            TYPE REF TO cl_gui_alv_grid.
+    DATA mo_parent         TYPE REF TO cl_gui_container.
+    DATA mv_container_name TYPE scrfname.
 
-    DATA at_ddown_first_alv TYPE lvc_t_drop.
-    DATA at_ddown_second_alv TYPE lvc_t_drop.
+    DATA gt_fcat           TYPE lvc_t_fcat.
+    DATA gt_f4             TYPE lvc_t_f4.
+    DATA at_ddown          TYPE lvc_t_drop.
+    DATA at_ddown_alias    TYPE lvc_t_dral.
 
-    DATA at_ddown_alias_first_alv TYPE lvc_t_dral.
-    DATA at_ddown_alias_second_alv TYPE lvc_t_dral.
+    DATA gv_program_name   TYPE string.
+    DATA mo_handler        TYPE REF TO zif_alv_event_handler.
 
-private section.
+  PRIVATE SECTION.
 
-  methods CREATE_DYN_FC
-    importing
-      value(IS_OUTTAB) type DATA
-      value(IT_CUSTOM_FC) type TTY_FC_CUSTOM optional
-    returning
-      value(CT_FIELDCAT) type LVC_T_FCAT .
-  methods CREATE_FC_FROM_CDS
-    importing
-      value(IV_ENTITY_NAME) type STRING
-      value(IS_OUTTAB) type DATA
-      value(IT_CUSTOM_FC) type TTY_FC_CUSTOM optional
-    returning
-      value(CT_FIELDCAT) type LVC_T_FCAT .
-  methods CREATE_FC_FROM_CHARACT
-    importing
-      value(IS_OUTTAB) type DATA
-      value(IT_CUSTOM_FC) type TTY_FC_CUSTOM optional
-    returning
-      value(CT_FIELDCAT) type LVC_T_FCAT .
-  methods SET_HANDLER_FIRST_ALV .
-  methods SET_HANDLER_SECOND_ALV .
-  " Handler Prima alv
-  methods HANDLE_TOOLBAR
-    for event TOOLBAR of CL_GUI_ALV_GRID
-    importing
-      !E_OBJECT
-      !E_INTERACTIVE .
-  methods HANDLE_USER_COMMAND
-    for event USER_COMMAND of CL_GUI_ALV_GRID
-    importing
-      !E_UCOMM .
-  methods HANDLE_HOTSPOT_CLICK
-    for event HOTSPOT_CLICK of CL_GUI_ALV_GRID
-    importing
-      !E_ROW_ID
-      !E_COLUMN_ID
-      !ES_ROW_NO .
-  methods HANDLE_DATA_CHANGED
-    for event DATA_CHANGED of CL_GUI_ALV_GRID
-    importing
-      !ER_DATA_CHANGED .
-  methods HANDLE_DOUBLE_CLICK
-    for event DOUBLE_CLICK of CL_GUI_ALV_GRID
-    importing
-      !E_ROW
-      !E_COLUMN .
-  methods HANDLE_ON_F4
-    for event ONF4 of CL_GUI_ALV_GRID
-    importing
-      !E_FIELDNAME
-      !ES_ROW_NO
-      !ER_EVENT_DATA .
-  " Handler Seconda alv
-  methods HANDLE_TOOLBAR_ST
-    for event TOOLBAR of CL_GUI_ALV_GRID
-    importing
-      !E_OBJECT
-      !E_INTERACTIVE .
-  methods HANDLE_USER_COMMAND_ST
-    for event USER_COMMAND of CL_GUI_ALV_GRID
-    importing
-      !E_UCOMM .
-  methods HANDLE_HOTSPOT_CLICK_ST
-    for event HOTSPOT_CLICK of CL_GUI_ALV_GRID
-    importing
-      !E_ROW_ID
-      !E_COLUMN_ID
-      !ES_ROW_NO .
-  methods HANDLE_DATA_CHANGED_ST
-    for event DATA_CHANGED of CL_GUI_ALV_GRID
-    importing
-      !ER_DATA_CHANGED .
-  methods HANDLE_DOUBLE_CLICK_ST
-    for event DOUBLE_CLICK of CL_GUI_ALV_GRID
-    importing
-      !E_ROW
-      !E_COLUMN .
-  methods HANDLE_ON_F4_ST
-    for event ONF4 of CL_GUI_ALV_GRID
-    importing
-      !E_FIELDNAME
-      !ES_ROW_NO
-      !ER_EVENT_DATA .
-  methods HANDLE_DATA_CHANGED_FINISHED
-    for event DATA_CHANGED_FINISHED of CL_GUI_ALV_GRID
-    importing
-      !E_MODIFIED
-      !ET_GOOD_CELLS .
+    " Lightweight DDIC cache
+    TYPES: BEGIN OF ty_dd03t_s,
+             fieldname TYPE dd03t-fieldname,
+             ddtext    TYPE dd03t-ddtext,
+           END OF ty_dd03t_s.
+    TYPES: BEGIN OF ty_dd03l_s,
+             fieldname TYPE dd03l-fieldname,
+             domname   TYPE dd03l-domname,
+             rollname  TYPE dd03l-rollname,
+           END OF ty_dd03l_s.
+    TYPES: BEGIN OF ty_dd04t_s,
+             rollname  TYPE dd04t-rollname,
+             scrtext_m TYPE dd04t-scrtext_m,
+           END OF ty_dd04t_s.
+    TYPES: BEGIN OF ty_dd01l_s,
+             domname  TYPE dd01l-domname,
+             convexit TYPE dd01l-convexit,
+           END OF ty_dd01l_s.
+    TYPES: BEGIN OF ty_ddic_cache,
+             tabname TYPE tabname,
+             dd03t   TYPE STANDARD TABLE OF ty_dd03t_s WITH EMPTY KEY,
+             dd03l   TYPE STANDARD TABLE OF ty_dd03l_s WITH EMPTY KEY,
+             dd04t   TYPE STANDARD TABLE OF ty_dd04t_s WITH EMPTY KEY,
+             dd01l   TYPE STANDARD TABLE OF ty_dd01l_s WITH EMPTY KEY,
+           END OF ty_ddic_cache.
+    CLASS-DATA gt_ddic_cache TYPE HASHED TABLE OF ty_ddic_cache
+                              WITH UNIQUE KEY tabname.
+
+    " Field-catalog builders
+    METHODS create_dyn_fc
+      IMPORTING is_outtab    TYPE data
+                it_custom_fc TYPE tty_fc_custom OPTIONAL
+      RETURNING VALUE(ct_fieldcat) TYPE lvc_t_fcat.
+
+    METHODS normalize_fieldcat
+      IMPORTING iv_tabname   TYPE tabname
+                it_custom_fc TYPE tty_fc_custom OPTIONAL
+      CHANGING  ct_fieldcat  TYPE lvc_t_fcat.
+
+    METHODS get_ddic_metadata
+      IMPORTING iv_tabname TYPE tabname
+      EXPORTING et_dd03t   TYPE ty_ddic_cache-dd03t
+                et_dd03l   TYPE ty_ddic_cache-dd03l
+                et_dd04t   TYPE ty_ddic_cache-dd04t
+                et_dd01l   TYPE ty_ddic_cache-dd01l.
+
+    METHODS set_handlers.
+
+    " ALV events
+    METHODS handle_toolbar
+      FOR EVENT toolbar OF cl_gui_alv_grid
+      IMPORTING e_object e_interactive.
+    METHODS handle_user_command
+      FOR EVENT user_command OF cl_gui_alv_grid
+      IMPORTING e_ucomm.
+    METHODS handle_hotspot_click
+      FOR EVENT hotspot_click OF cl_gui_alv_grid
+      IMPORTING e_row_id e_column_id es_row_no.
+    METHODS handle_data_changed
+      FOR EVENT data_changed OF cl_gui_alv_grid
+      IMPORTING er_data_changed.
+    METHODS handle_double_click
+      FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING e_row e_column.
+    METHODS handle_on_f4
+      FOR EVENT onf4 OF cl_gui_alv_grid
+      IMPORTING e_fieldname es_row_no er_event_data.
+    METHODS handle_data_changed_finished
+      FOR EVENT data_changed_finished OF cl_gui_alv_grid
+      IMPORTING e_modified et_good_cells.
+
 ENDCLASS.
 
 
+CLASS zcl_alv_manager IMPLEMENTATION.
 
-CLASS ZCL_ALV_MANAGER IMPLEMENTATION.
+  METHOD create.
+    " FIX: Explicitly define the reference variable to avoid generic declaration errors
+    DATA lr_outtab TYPE REF TO data.
+    GET REFERENCE OF ct_outtab INTO lr_outtab.
 
+    CREATE OBJECT ro_manager
+      EXPORTING iv_program_name = iv_program_name
+                ir_outtab       = lr_outtab
+                io_alv          = io_alv
+                io_parent       = io_parent
+                it_custom_fc    = it_custom_fc.
+  ENDMETHOD.
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->CONSTRUCTOR
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IV_PROGRAM_NAME                TYPE        STRING
-* | [--->] IV_CDS_NAME                    TYPE        STRING(optional)
-* | [--->] IV_CHARACT_FC                  TYPE        FLAG(optional)
-* | [--->] IT_OUTTAB                      TYPE        ANY
-* | [--->] IO_ALV                         TYPE REF TO CL_GUI_ALV_GRID(optional)
-* | [--->] IT_CUSTOM_FC                   TYPE        TTY_FC_CUSTOM(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD constructor.
-
-    DATA: lref_row_outtab     TYPE REF TO data.
-
-    FIELD-SYMBOLS: <fs_outtab_row> TYPE any,
-                   <fs_outtab>     TYPE INDEX TABLE.
+    DATA lref_row TYPE REF TO data.
+    FIELD-SYMBOLS <ls_row> TYPE any.
+    FIELD-SYMBOLS <lt_outtab> TYPE ANY TABLE.
 
     gv_program_name = iv_program_name.
 
-    " Creo una tabella indicizzata
-    CREATE DATA gref_outtab LIKE it_outtab.
-    ASSIGN gref_outtab->* TO <fs_outtab>.
+    " Store the writable reference
+    gref_outtab = ir_outtab.
 
-    " Creo una struttura basata sulla tabella
-    CREATE DATA lref_row_outtab LIKE LINE OF <fs_outtab>.
-    ASSIGN lref_row_outtab->* TO <fs_outtab_row>.
+    " Dereference the handle to build the field catalog
+    ASSIGN gref_outtab->* TO <lt_outtab>.
+    CREATE DATA lref_row LIKE LINE OF <lt_outtab>.
+    ASSIGN lref_row->* TO <ls_row>.
 
-    " Passo i dati in input alla tabella
-    MOVE-CORRESPONDING it_outtab TO <fs_outtab>.
+    IF io_alv IS BOUND.    go_alv    = io_alv.    ENDIF.
+    IF io_parent IS BOUND. mo_parent = io_parent. ENDIF.
 
-    " Creo il fc della tabella ricevuta
-    IF iv_cds_name IS NOT INITIAL.
-      gt_fcat = create_fc_from_cds( iv_entity_name = iv_cds_name is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
-    ELSE.
-      gt_fcat = create_dyn_fc( EXPORTING is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
-    ENDIF.
-
-    IF iv_charact_fc EQ abap_true.
-      gt_fcat = create_fc_from_charact( is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
-    ENDIF.
-
+    gt_fcat = create_dyn_fc( is_outtab = <ls_row>
+                             it_custom_fc = it_custom_fc ).
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->CREATE_DYN_FC
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IS_OUTTAB                      TYPE        DATA
-* | [--->] IT_CUSTOM_FC                   TYPE        TTY_FC_CUSTOM(optional)
-* | [<-()] CT_FIELDCAT                    TYPE        LVC_T_FCAT
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD create_dyn_fc.
-    TYPES: BEGIN OF ty_dd04t,
-             rollname  TYPE rollname,
-             scrtext_m TYPE scrtext_m,
-           END OF ty_dd04t,
-           BEGIN OF ty_dd01l,
-             domname  TYPE dd01l-domname,
-             convexit TYPE dd01l-convexit,
-           END OF ty_dd01l.
-
-    DATA : lo_ref_descr   TYPE REF TO cl_abap_structdescr,
-           lt_detail      TYPE abap_compdescr_tab,
-           lt_field_det   TYPE REF TO cl_abap_structdescr,
-           lt_coldescr    TYPE TABLE OF ty_dd04t,
-           lt_dd01l       TYPE TABLE OF ty_dd01l,
-           lref_typedescr TYPE REF TO cl_abap_typedescr,
-           lref_elemdescr TYPE REF TO cl_abap_elemdescr,
-           lv_counter     TYPE i VALUE 0.
-
-    FIELD-SYMBOLS: <fs_dref>  TYPE any,
-                   <fs_fname> TYPE any.
-
-    lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( is_outtab ). "Chiamare metodo statico su una struttura
-    lt_detail[] = lo_ref_descr->components.
-
-    " Loop sui componenti della struttura - Creo fc
-    LOOP AT lt_detail ASSIGNING FIELD-SYMBOL(<fs_detail>).
-      ASSIGN COMPONENT <fs_detail>-name OF STRUCTURE is_outtab TO FIELD-SYMBOL(<fs_outtab_comp>).
-
-      IF <fs_outtab_comp> IS ASSIGNED.
-
-        lref_typedescr = cl_abap_typedescr=>describe_by_data( <fs_outtab_comp> ) .
-
-        IF lref_typedescr->absolute_name+6 EQ 'LVC_T_SCOL' OR lref_typedescr->absolute_name+6 EQ 'LVC_T_STYL'.
-          CONTINUE.
-        ENDIF.
-        lref_elemdescr ?= cl_abap_typedescr=>describe_by_data( <fs_outtab_comp> ) .
-
-        APPEND VALUE #(
-          ref_field = lref_typedescr->absolute_name+6
-          fieldname = <fs_detail>-name
-          outputlen = COND #( WHEN lref_typedescr->type_kind EQ 'P' THEN lref_elemdescr->output_length ELSE lref_typedescr->length )
-          decimals_o = lref_typedescr->decimals
-          inttype = <fs_detail>-type_kind
-          datatype = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN 'DATS' ELSE '' )
-*          intlen = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN '000008' ELSE '' )
-*          dd_outlen  = COND #( WHEN <fs_detail>-type_kind EQ 'D' THEN '000010' ELSE '' )
-          col_opt = 'X'
-        ) TO ct_fieldcat.
-
-      ENDIF.
-    ENDLOOP.
-
-    " Estraggo descrizioni colonne std
-    SELECT rollname, scrtext_m
-     FROM dd04t
-     INTO TABLE @lt_coldescr
-     FOR ALL ENTRIES IN @ct_fieldcat
-     WHERE rollname EQ @ct_fieldcat-ref_field
-     AND ddlanguage EQ @sy-langu.
-
-    SELECT domname, convexit
-     FROM dd01l
-     INTO CORRESPONDING FIELDS OF TABLE @lt_dd01l
-     FOR ALL ENTRIES IN @ct_fieldcat
-     WHERE domname EQ @ct_fieldcat-fieldname
-     AND as4local EQ 'A'
-     AND as4vers EQ ' '.
-
-    SELECT fieldname, ddtext
-    FROM dd03t
-    WHERE tabname EQ @lo_ref_descr->absolute_name+6(30)
-    AND ddlanguage EQ @sy-langu
-    AND as4local EQ 'A'
-    INTO TABLE @DATA(lt_dd03t).
-
-
-    " Trasformo i campi inseriti dall'utente in upper case per evitare errori
-    LOOP AT it_custom_fc REFERENCE INTO DATA(lr_cust_fc).
-      TRANSLATE lr_cust_fc->fieldname TO UPPER CASE.
-    ENDLOOP.
-
-    " Applico le modifiche custom ai campi del fc
-    LOOP AT ct_fieldcat ASSIGNING FIELD-SYMBOL(<fs_fcat>).
-
-      READ TABLE lt_dd03t INTO DATA(ls_dd03t) WITH KEY fieldname = <fs_fcat>-fieldname.
-      IF sy-subrc EQ 0.
-        <fs_fcat>-coltext = <fs_fcat>-scrtext_m = ls_dd03t-ddtext.
-      ELSE.
-        " Inserisco la descrizione del dominio nella colonna
-        READ TABLE lt_coldescr INTO DATA(ls_coldescr) WITH KEY rollname = <fs_fcat>-ref_field.
-        <fs_fcat>-coltext = <fs_fcat>-scrtext_m = ls_coldescr-scrtext_m.
-      ENDIF.
-
-      READ TABLE lt_dd01l INTO DATA(ls_dd01l) WITH KEY domname = <fs_fcat>-fieldname.
-      <fs_fcat>-convexit = ls_dd01l-convexit.
-
-      LOOP AT it_custom_fc ASSIGNING FIELD-SYMBOL(<fs_custom_fc>)
-        WHERE fieldname EQ <fs_fcat>-fieldname OR fieldname EQ '*'.
-
-        ASSIGN COMPONENT <fs_custom_fc>-fc_component OF STRUCTURE <fs_fcat> TO FIELD-SYMBOL(<fs_comp>).
-        IF sy-subrc EQ 0.
-          <fs_comp> =  <fs_custom_fc>-value.
-        ENDIF.
-      ENDLOOP.
-
-      IF <fs_fcat>-col_id IS INITIAL.
-        lv_counter += 1.
-        <fs_fcat>-col_id = <fs_fcat>-col_pos = lv_counter.
-      ENDIF.
-
-      CLEAR: ls_dd01l, ls_coldescr.
-    ENDLOOP.
-
+  METHOD set_container_name.
+    mv_container_name = iv_container_name.
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->CREATE_FC_FROM_CDS
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IV_ENTITY_NAME                 TYPE        STRING
-* | [--->] IS_OUTTAB                      TYPE        DATA
-* | [--->] IT_CUSTOM_FC                   TYPE        TTY_FC_CUSTOM(optional)
-* | [<-()] CT_FIELDCAT                    TYPE        LVC_T_FCAT
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD create_fc_from_cds.
-
-    DATA : lo_ref_descr   TYPE REF TO cl_abap_structdescr,
-           lt_detail      TYPE abap_compdescr_tab,
-           lt_field_det   TYPE REF TO cl_abap_structdescr,
-           lref_typedescr TYPE REF TO cl_abap_typedescr,
-           lref_elemdescr TYPE REF TO cl_abap_elemdescr.
-
-    cl_dd_ddl_annotation_service=>get_annos(
-      EXPORTING
-        entityname      = CONV #( iv_entity_name )
-      IMPORTING
-        element_annos   = DATA(element_annos)
-        entity_annos    = DATA(entity_annos)
-        parameter_annos = DATA(parameter_annos)
-        annos_tstmp     = DATA(annos_tstmp)
-    ).
-
-    DATA(lv_counter) = 0.
-    lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( is_outtab ). "Chiamare metodo statico su una struttura
-    lt_detail[] = lo_ref_descr->components.
-
-    LOOP AT lt_detail ASSIGNING FIELD-SYMBOL(<fs_detail>).
-      ASSIGN COMPONENT <fs_detail>-name OF STRUCTURE is_outtab TO FIELD-SYMBOL(<fs_comp>).
-      DATA(ls_col_text) = VALUE #(  element_annos[ elementname = <fs_detail>-name annoname = 'ENDUSERTEXT.LABEL' ] OPTIONAL ).
-
-      IF <fs_comp> IS ASSIGNED.
-
-        lref_typedescr = cl_abap_typedescr=>describe_by_data( <fs_comp> ) .
-        lref_elemdescr ?= cl_abap_typedescr=>describe_by_data( <fs_comp> ) .
-
-        APPEND VALUE #(
-          ref_field = lref_typedescr->absolute_name+6
-          fieldname = <fs_detail>-name
-          outputlen = COND #( WHEN lref_typedescr->type_kind EQ 'P' THEN lref_elemdescr->output_length ELSE lref_typedescr->length )
-          decimals_o = lref_typedescr->decimals
-          col_opt = 'X'
-        ) TO ct_fieldcat ASSIGNING FIELD-SYMBOL(<fs_fcat>).
-
-        <fs_fcat>-coltext = <fs_fcat>-scrtext_m = ls_col_text-value.
-      ENDIF.
-      LOOP AT it_custom_fc ASSIGNING FIELD-SYMBOL(<fs_custom_fc>)
-        WHERE fieldname EQ <fs_fcat>-fieldname OR fieldname EQ '*'.
-
-        ASSIGN COMPONENT <fs_custom_fc>-fc_component OF STRUCTURE <fs_fcat> TO FIELD-SYMBOL(<fs_comp_fcat>).
-        IF sy-subrc EQ 0.
-          <fs_comp_fcat> =  <fs_custom_fc>-value.
-        ENDIF.
-      ENDLOOP.
-
-      IF <fs_fcat>-col_id IS INITIAL.
-        lv_counter += 1.
-        <fs_fcat>-col_id = <fs_fcat>-col_pos = lv_counter.
-      ENDIF.
-
-    ENDLOOP.
-
+  METHOD set_event_handler.
+    mo_handler = io_handler.
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->CREATE_FC_FROM_CHARACT
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IS_OUTTAB                      TYPE        DATA
-* | [--->] IT_CUSTOM_FC                   TYPE        TTY_FC_CUSTOM(optional)
-* | [<-()] CT_FIELDCAT                    TYPE        LVC_T_FCAT
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD create_fc_from_charact.
-    DATA : lo_ref_descr         TYPE REF TO cl_abap_structdescr,
-           lref_typedescr       TYPE REF TO cl_abap_typedescr,
-           lt_detail            TYPE abap_compdescr_tab,
-           lt_chardescr         TYPE TABLE OF bapicharactdescr,
-           lt_bapiret           TYPE TABLE OF bapiret2,
-           ls_bapicharactdetail TYPE bapicharactdetail.
-
-    DATA(lv_counter) = 0.
-    lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( is_outtab ). "Chiamare metodo statico su una struttura
-    lt_detail[] = lo_ref_descr->components.
-
-    LOOP AT lt_detail ASSIGNING FIELD-SYMBOL(<fs_detail>).
-      lv_counter += 1.
-
-      CALL FUNCTION 'BAPI_CHARACT_GETDETAIL'
-        EXPORTING
-          charactname   = <fs_detail>-name
-          keydate       = sy-datum
-        IMPORTING
-          charactdetail = ls_bapicharactdetail
-        TABLES
-          charactdescr  = lt_chardescr
-          return        = lt_bapiret.
-
-      CHECK ls_bapicharactdetail IS NOT INITIAL.
-      ASSIGN COMPONENT <fs_detail>-name OF STRUCTURE is_outtab TO FIELD-SYMBOL(<fs_comp>).
-
-      IF <fs_comp> IS ASSIGNED.
-        lref_typedescr = cl_abap_typedescr=>describe_by_data( <fs_comp> ) .
-
-        DATA(ls_chardescr) = VALUE #( lt_chardescr[ 1 ] OPTIONAL ).
-        APPEND VALUE #(
-            inttype = COND #( WHEN ls_bapicharactdetail-data_type EQ 'CHAR' THEN 'C' ELSE 'P' ) "lref_typedescr->absolute_name+6
-            fieldname = <fs_detail>-name
-            outputlen = ls_bapicharactdetail-length
-            col_id    = lv_counter
-            decimals_o = ls_bapicharactdetail-decimals
-            coltext = ls_chardescr-description
-            scrtext_m = ls_chardescr-description
-          ) TO ct_fieldcat ASSIGNING FIELD-SYMBOL(<fs_fcat>).
-
-        LOOP AT it_custom_fc ASSIGNING FIELD-SYMBOL(<fs_custom_fc>)
-          WHERE fieldname EQ <fs_fcat>-fieldname OR fieldname EQ '*'.
-
-          ASSIGN COMPONENT <fs_custom_fc>-fc_component OF STRUCTURE <fs_fcat> TO FIELD-SYMBOL(<fs_comp_fcat>).
-          IF sy-subrc EQ 0.
-            <fs_comp_fcat> =  <fs_custom_fc>-value.
-          ENDIF.
-        ENDLOOP.
-      ENDIF.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->DISPLAY_DATA
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IS_VARIANT_FT                  TYPE        DISVARIANT(optional)
-* | [--->] IV_SAVE_FT                     TYPE        CHAR01 (default ='A')
-* | [--->] IS_LAYOUT_FT                   TYPE        LVC_S_LAYO(optional)
-* | [--->] IS_VARIANT_ST                  TYPE        DISVARIANT(optional)
-* | [--->] IV_SAVE_ST                     TYPE        CHAR01(optional)
-* | [--->] IS_LAYOUT_ST                   TYPE        LVC_S_LAYO(optional)
-* | [--->] IV_VERTICAL                    TYPE        FLAG(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD display_data.
-    FIELD-SYMBOLS: <fs_outtab>        TYPE ANY TABLE,
-                   <fs_second_outtab> TYPE ANY TABLE.
-
-    IF gt_second_fcat IS NOT INITIAL.
-
-      DATA(lo_cont_docking) = NEW cl_gui_docking_container(
-        parent = cl_gui_container=>screen0
-        ratio  = 90
-      ).
-      lo_cont_docking->set_extension( EXPORTING extension = 99999 EXCEPTIONS cntl_error = 1 OTHERS = 2 ).
-
-      DATA(lo_split_container) = NEW cl_gui_splitter_container(
-        parent  = lo_cont_docking
-        rows    = COND #( WHEN iv_vertical EQ abap_true THEN '1' ELSE '2' )
-        columns = COND #( WHEN iv_vertical EQ abap_true THEN '2' ELSE '1' )
-      ).
-
-      lo_split_container->get_container(
-        EXPORTING
-          row       = 1                 " Row
-          column    = 1                " Column
-        RECEIVING
-          container = DATA(lo_first_container)                 " Container
-      ).
-
-      lo_split_container->get_container(
-        EXPORTING
-          row       = COND #( WHEN iv_vertical EQ abap_true THEN '1' ELSE '2' )                 " Row
-          column    = COND #( WHEN iv_vertical EQ abap_true THEN '2' ELSE '1' )                " Column
-        RECEIVING
-          container = DATA(lo_second_container)                 " Container
-      ).
-
-      go_alv = NEW cl_gui_alv_grid( i_parent = lo_first_container ).
-      go_second_alv = NEW cl_gui_alv_grid( i_parent = lo_second_container ).
-
-      IF sy-batch EQ abap_false.
-      set_handler_first_alv( ).
-      set_handler_second_alv( ).
-
-      go_alv->set_drop_down_table(
-        EXPORTING
-          it_drop_down       = at_ddown_first_alv
-          it_drop_down_alias = at_ddown_alias_first_alv
-      ).
-
-      go_second_alv->set_drop_down_table(
-        EXPORTING
-          it_drop_down       = at_ddown_second_alv
-          it_drop_down_alias = at_ddown_alias_second_alv
-      ).
-      ENDIF.
-
-      ASSIGN gref_outtab->* TO <fs_outtab>.
-      ASSIGN gref_second_outtab->* TO <fs_second_outtab>.
-
-      go_alv->set_table_for_first_display(
-        EXPORTING
-          is_layout       = is_layout_ft
-          is_variant      = is_variant_ft
-          i_save          = iv_save_ft
-        CHANGING
-          it_outtab       = <fs_outtab>
-          it_fieldcatalog = gt_fcat
-      ).
-
-      go_second_alv->set_table_for_first_display(
-        EXPORTING
-          is_layout       = is_layout_st
-          is_variant      = is_variant_st
-          i_save          = iv_save_st
-        CHANGING
-          it_outtab       = <fs_second_outtab>
-          it_fieldcatalog = gt_second_fcat
-      ).
-
-      DATA(lt_empty_cell) = VALUE lvc_t_cell( ( row_id = VALUE #( index = 0 ) ) ).
-      go_second_alv->set_selected_cells( it_cells = lt_empty_cell ).
-
-    ELSE.
-      go_alv = NEW cl_gui_alv_grid( i_parent = cl_gui_container=>default_screen ).
-      IF sy-batch EQ abap_false.
-      set_handler_first_alv( ).
-      go_alv->set_drop_down_table(
-        EXPORTING
-          it_drop_down       = at_ddown_first_alv
-          it_drop_down_alias = at_ddown_alias_first_alv
-      ).
-      ENDIF.
-      ASSIGN gref_outtab->* TO <fs_outtab>.
-
-      go_alv->set_table_for_first_display(
-        EXPORTING
-          is_layout       = is_layout_ft
-          is_variant      = is_variant_ft
-          i_save          = iv_save_ft
-        CHANGING
-          it_outtab       = <fs_outtab>
-          it_fieldcatalog = gt_fcat
-      ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Static Public Method ZCL_ALV_MANAGER=>DISPLAY_DATA_POPUP
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] I_START_COLUMN                 TYPE        I (default =25)
-* | [--->] I_START_LINE                   TYPE        I (default =6)
-* | [--->] I_END_COLUMN                   TYPE        I (default =100)
-* | [--->] I_END_LINE                     TYPE        I (default =10)
-* | [--->] IT_DATA                        TYPE        STANDARD TABLE
-* | [--->] IT_FC                          TYPE        TYT_FC_POPUP(optional)
-* | [--->] IV_SHOW_HEADER                 TYPE        ABAP_BOOL(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD display_data_popup.
-    DATA: lo_salv TYPE REF TO cl_salv_table.
-
-    TRY.
-        cl_salv_table=>factory(
-          IMPORTING
-            r_salv_table = lo_salv
-          CHANGING
-            t_table      = it_data[] ).
-
-      CATCH cx_salv_msg.
-    ENDTRY.
-
-    DATA: lr_functions TYPE REF TO cl_salv_functions_list.
-
-    lr_functions = lo_salv->get_functions( ).
-    lr_functions->set_all( 'X' ).
-    DATA(lo_columns) = lo_salv->get_columns( ).
-    lo_columns->set_headers_visible(
-                value = iv_show_header
-            ).
-
-    LOOP AT it_fc ASSIGNING FIELD-SYMBOL(<fs_fc>).
-        DATA(lo_column) = lo_columns->get_column( columnname = <fs_fc>-col_name ).
-        IF <fs_fc>-long_txt IS NOT INITIAL.
-            lo_column->set_long_text( value = <fs_fc>-long_txt ).
-        ENDIF.
-        IF <fs_fc>-out_len IS NOT INITIAL.
-            lo_column->set_output_length( value = <fs_fc>-out_len ).
-        ENDIF.
-    ENDLOOP.
-
-    IF lo_salv IS BOUND.
-
-      lo_salv->set_screen_popup(
-        start_column = i_start_column
-        end_column  = i_end_column
-        start_line  = i_start_line
-        end_line    = i_end_line
-
-      ).
-      lo_salv->display( ).
-
-    ENDIF.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->GET_FCAT
-* +-------------------------------------------------------------------------------------------------+
-* | [<-()] RT_FCAT                        TYPE        LVC_T_FCAT
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD get_fcat.
-    " Ritorno all'utente il fc creato nel costruttore
     rt_fcat = gt_fcat.
   ENDMETHOD.
 
+  METHOD display_data.
+    FIELD-SYMBOLS <lt_out> TYPE ANY TABLE.
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->GET_OUTPUT_TABLES
-* +-------------------------------------------------------------------------------------------------+
-* | [<---] ET_TABLE_FT                    TYPE REF TO DATA
-* | [<---] ET_TABLE_ST                    TYPE REF TO DATA
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD get_output_tables.
-    et_table_ft = gref_outtab.
-    et_table_st = gref_second_outtab.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_DATA_CHANGED
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] ER_DATA_CHANGED                LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_data_changed.
-    PERFORM handle_data_changed IN PROGRAM (gv_program_name) IF FOUND USING er_data_changed.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_DATA_CHANGED_FINISHED
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_MODIFIED                     LIKE
-* | [--->] ET_GOOD_CELLS                  LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-METHOD handle_data_changed_finished.
-  PERFORM handle_data_changed_finished
-       IN PROGRAM (gv_program_name) IF FOUND USING e_modified
-                                                   et_good_cells.
-ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_DATA_CHANGED_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] ER_DATA_CHANGED                LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_data_changed_st.
-    PERFORM handle_data_changed_st IN PROGRAM (gv_program_name) IF FOUND USING er_data_changed.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_DOUBLE_CLICK
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_ROW                          LIKE
-* | [--->] E_COLUMN                       LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_double_click.
-    PERFORM handle_double_click IN PROGRAM (gv_program_name) IF FOUND USING e_row e_column.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_DOUBLE_CLICK_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_ROW                          LIKE
-* | [--->] E_COLUMN                       LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_double_click_st.
-    PERFORM handle_double_click_st IN PROGRAM (gv_program_name) IF FOUND USING e_row e_column.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_HOTSPOT_CLICK
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_ROW_ID                       LIKE
-* | [--->] E_COLUMN_ID                    LIKE
-* | [--->] ES_ROW_NO                      LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_hotspot_click.
-    PERFORM handle_hotspot_click IN PROGRAM (gv_program_name) IF FOUND USING e_row_id e_column_id es_row_no.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_HOTSPOT_CLICK_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_ROW_ID                       LIKE
-* | [--->] E_COLUMN_ID                    LIKE
-* | [--->] ES_ROW_NO                      LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_hotspot_click_st.
-    PERFORM handle_hotspot_click_st IN PROGRAM (gv_program_name) IF FOUND USING  e_row_id e_column_id es_row_no.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_ON_F4
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_FIELDNAME                    LIKE
-* | [--->] ES_ROW_NO                      LIKE
-* | [--->] ER_EVENT_DATA                  LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_on_f4.
-    PERFORM handle_on_f4 IN PROGRAM (gv_program_name) IF FOUND USING e_fieldname es_row_no er_event_data.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_ON_F4_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_FIELDNAME                    LIKE
-* | [--->] ES_ROW_NO                      LIKE
-* | [--->] ER_EVENT_DATA                  LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_on_f4_st.
-    PERFORM handle_on_f4_st IN PROGRAM (gv_program_name) IF FOUND USING e_fieldname es_row_no er_event_data.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_TOOLBAR
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_OBJECT                       LIKE CL_ALV_EVENT_TOOLBAR_SET
-* | [--->] E_INTERACTIVE                  LIKE CHAR01
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_toolbar.
-    PERFORM handle_toolbar IN PROGRAM (gv_program_name) IF FOUND USING e_object e_interactive.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_TOOLBAR_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_OBJECT                       LIKE
-* | [--->] E_INTERACTIVE                  LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_toolbar_st.
-    PERFORM handle_toolbar_st IN PROGRAM (gv_program_name) IF FOUND USING e_object e_interactive.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_USER_COMMAND
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_UCOMM                        LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_user_command.
-    DATA: lt_rows     TYPE lvc_t_row.
-    go_alv->get_selected_rows(
-      IMPORTING
-        et_index_rows = lt_rows
-    ).
-    PERFORM handle_user_command IN PROGRAM (gv_program_name) IF FOUND USING e_ucomm lt_rows.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->HANDLE_USER_COMMAND_ST
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] E_UCOMM                        LIKE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD handle_user_command_st.
-    DATA: lt_rows     TYPE lvc_t_row.
-    go_second_alv->get_selected_rows(
-      IMPORTING
-        et_index_rows = lt_rows
-    ).
-    PERFORM handle_user_command_st IN PROGRAM (gv_program_name) IF FOUND USING  e_ucomm lt_rows.
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->SET_DROP_DOWN_TABLE_FIRST_ALV
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_DROP_DOWN                   TYPE        LVC_T_DROP(optional)
-* | [--->] IT_DROP_DOWN_ALIAS             TYPE        LVC_T_DRAL(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_drop_down_table_first_alv.
-    at_ddown_first_alv = CORRESPONDING #( BASE ( at_ddown_first_alv ) it_drop_down ).
-    at_ddown_alias_first_alv = CORRESPONDING #( BASE ( at_ddown_alias_first_alv ) it_drop_down_alias ).
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->SET_DROP_DOWN_TABLE_SECOND_ALV
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_DROP_DOWN                   TYPE        LVC_T_DROP(optional)
-* | [--->] IT_DROP_DOWN_ALIAS             TYPE        LVC_T_DRAL(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_drop_down_table_second_alv.
-    at_ddown_second_alv = CORRESPONDING #( BASE ( at_ddown_second_alv ) it_drop_down ).
-    at_ddown_alias_second_alv = CORRESPONDING #( BASE ( at_ddown_alias_second_alv ) it_drop_down_alias ).
-  ENDMETHOD.
-
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->SET_HANDLER_FIRST_ALV
-* +-------------------------------------------------------------------------------------------------+
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_handler_first_alv.
-
-    SET HANDLER me->handle_toolbar FOR go_alv.
-    SET HANDLER me->handle_user_command FOR go_alv.
-    SET HANDLER me->handle_hotspot_click FOR go_alv.
-    SET HANDLER me->handle_double_click FOR go_alv.
-    SET HANDLER me->handle_data_changed FOR go_alv.
-    SET HANDLER me->handle_data_changed_finished FOR go_alv.
-
-    IF gt_f4 IS NOT INITIAL.
-      IF go_alv IS NOT INITIAL.
-        go_alv->register_f4_for_fields( it_f4 = gt_f4 ).
-      ENDIF.
-      SET HANDLER me->handle_on_f4        FOR go_alv.
+    " This now points to the original, writable table
+    ASSIGN gref_outtab->* TO <lt_out>.
+    IF <lt_out> IS NOT ASSIGNED.
+      RETURN.
     ENDIF.
 
+    IF mo_parent IS INITIAL AND mv_container_name IS NOT INITIAL.
+      mo_parent = NEW cl_gui_custom_container( container_name = mv_container_name ).
+    ENDIF.
+
+    IF go_alv IS NOT BOUND.
+      DATA lo_parent TYPE REF TO cl_gui_container.
+      IF mo_parent IS BOUND.
+        lo_parent = mo_parent.
+      ELSE.
+        lo_parent = cl_gui_container=>default_screen.
+      ENDIF.
+      go_alv = NEW cl_gui_alv_grid( i_parent = lo_parent ).
+    ENDIF.
+
+    IF sy-batch = abap_false.
+      set_handlers( ).
+      IF at_ddown IS NOT INITIAL OR at_ddown_alias IS NOT INITIAL.
+        go_alv->set_drop_down_table(
+          it_drop_down       = at_ddown
+          it_drop_down_alias = at_ddown_alias ).
+      ENDIF.
+    ENDIF.
+
+    DATA lt_fcat TYPE lvc_t_fcat.
+    lt_fcat = gt_fcat.
+
+    go_alv->set_table_for_first_display(
+      EXPORTING
+        is_layout       = is_layout_ft
+        is_variant      = is_variant_ft
+        i_save          = iv_save_ft
+      CHANGING
+        it_outtab       = <lt_out>
+        it_fieldcatalog = lt_fcat ).
+
+    gt_fcat = lt_fcat.
   ENDMETHOD.
 
+  METHOD display_data_popup.
+    DATA lo_salv TYPE REF TO cl_salv_table.
+    TRY.
+        cl_salv_table=>factory(
+          IMPORTING r_salv_table = lo_salv
+          CHANGING  t_table      = ct_data ).
+      CATCH cx_salv_msg.
+        RETURN.
+    ENDTRY.
+    IF lo_salv IS INITIAL.
+      RETURN.
+    ENDIF.
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_ALV_MANAGER->SET_HANDLER_SECOND_ALV
-* +-------------------------------------------------------------------------------------------------+
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_handler_second_alv.
-    SET HANDLER me->handle_toolbar_st FOR go_second_alv.
-    SET HANDLER me->handle_user_command_st FOR go_second_alv.
-    SET HANDLER me->handle_hotspot_click_st FOR go_second_alv.
-    SET HANDLER me->handle_double_click_st FOR go_second_alv.
-    SET HANDLER me->handle_data_changed_st FOR go_second_alv.
-    IF gt_f4 IS NOT INITIAL.
-      IF go_second_alv IS NOT INITIAL.
-        go_second_alv->register_f4_for_fields( it_f4 = gt_second_f4 ).
+    DATA(lo_columns) = lo_salv->get_columns( ).
+    lo_columns->set_headers_visible( value = iv_show_header ).
+    DATA(lr_functions) = lo_salv->get_functions( ).
+    lr_functions->set_all( abap_true ).
+
+    LOOP AT it_fc ASSIGNING FIELD-SYMBOL(<fs_fc>).
+      DATA lv_col TYPE ty_salv_colname.
+      lv_col = <fs_fc>-col_name.
+      DATA(lo_column) = lo_columns->get_column( columnname = lv_col ).
+      IF <fs_fc>-long_txt IS NOT INITIAL.
+        lo_column->set_long_text( value = <fs_fc>-long_txt ).
       ENDIF.
-      SET HANDLER me->handle_on_f4_st       FOR go_second_alv.
+      IF <fs_fc>-out_len IS NOT INITIAL.
+        lo_column->set_output_length( value = <fs_fc>-out_len ).
+      ENDIF.
+    ENDLOOP.
+
+    lo_salv->set_screen_popup(
+      start_column = i_start_column
+      end_column   = i_end_column
+      start_line   = i_start_line
+      end_line     = i_end_line ).
+    lo_salv->display( ).
+  ENDMETHOD.
+
+  METHOD get_output_table.
+    er_table = gref_outtab.
+  ENDMETHOD.
+
+  METHOD update_table.
+    IF it_table IS NOT INITIAL.
+      IF go_alv IS BOUND.
+        go_alv->refresh_table_display(
+          is_stable = VALUE lvc_s_stbl( row = 'X' col = 'X' ) ).
+      ENDIF.
     ENDIF.
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->SET_REGISTER_FLD_FIRST_ALV
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_F4                          TYPE        LVC_T_F4
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_register_fld_first_alv.
+  METHOD set_register_fld.
     APPEND LINES OF it_f4 TO gt_f4.
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->SET_REGISTER_FLD_SECOND_ALV
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_F4                          TYPE        LVC_T_F4
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_register_fld_second_alv.
-    APPEND LINES OF it_f4 TO gt_second_f4.
+  METHOD set_drop_down_table.
+    at_ddown       = CORRESPONDING #( BASE ( at_ddown )       it_drop_down ).
+    at_ddown_alias = CORRESPONDING #( BASE ( at_ddown_alias ) it_drop_down_alias ).
   ENDMETHOD.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->SET_SECOND_TABLE
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_OUTTAB                      TYPE        ANY
-* | [--->] IT_CUSTOM_FC                   TYPE        TTY_FC_CUSTOM(optional)
-* | [--->] IV_CDS_NAME                    TYPE        STRING(optional)
-* | [--->] IV_CHARACT_FC                  TYPE        FLAG(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD set_second_table.
-    DATA: lref_row_outtab TYPE REF TO data.
-
-    FIELD-SYMBOLS: <fs_outtab_row> TYPE any,
-                   <fs_outtab>     TYPE INDEX TABLE.
-
-    " Creo una tabella indicizzata
-    CREATE DATA gref_second_outtab LIKE it_outtab.
-    ASSIGN gref_second_outtab->* TO <fs_outtab>.
-
-    " Creo una struttura basata sulla tabella
-    CREATE DATA lref_row_outtab LIKE LINE OF <fs_outtab>.
-    ASSIGN lref_row_outtab->* TO <fs_outtab_row>.
-
-    MOVE-CORRESPONDING it_outtab TO <fs_outtab>.
-
-    IF iv_cds_name IS NOT INITIAL.
-      gt_second_fcat = create_fc_from_cds( iv_entity_name = iv_cds_name is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
+  METHOD set_editable_columns.
+    IF ct_fcat IS INITIAL.
+      LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(<f>)
+           WHERE fieldname IN it_fields_rng.
+        <f>-edit = abap_true.
+      ENDLOOP.
     ELSE.
-      gt_second_fcat = create_dyn_fc( EXPORTING is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
+      LOOP AT ct_fcat ASSIGNING FIELD-SYMBOL(<fc>)
+           WHERE fieldname IN it_fields_rng.
+        <fc>-edit = abap_true.
+      ENDLOOP.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD set_sum_columns.
+    IF ct_fcat IS INITIAL.
+      LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(<f>)
+           WHERE fieldname IN it_fields_rng.
+        <f>-do_sum = abap_true.
+      ENDLOOP.
+    ELSE.
+      LOOP AT ct_fcat ASSIGNING FIELD-SYMBOL(<fc>)
+           WHERE fieldname IN it_fields_rng.
+        <fc>-do_sum = abap_true.
+      ENDLOOP.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD set_checkbox_columns.
+    IF ct_fcat IS INITIAL.
+      LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(<f>)
+           WHERE fieldname IN it_fields_rng.
+        <f>-checkbox = abap_true.
+        <f>-edit     = abap_true.
+      ENDLOOP.
+    ELSE.
+      LOOP AT ct_fcat ASSIGNING FIELD-SYMBOL(<fc>)
+           WHERE fieldname IN it_fields_rng.
+        <fc>-checkbox = abap_true.
+        <fc>-edit     = abap_true.
+      ENDLOOP.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD create_dyn_fc.
+    DATA lo_ref_descr TYPE REF TO cl_abap_structdescr.
+    DATA lt_detail    TYPE abap_compdescr_tab.
+    FIELD-SYMBOLS <fs_detail>      TYPE abap_compdescr.
+    FIELD-SYMBOLS <fs_outtab_comp> TYPE any.
+
+    lo_ref_descr ?= cl_abap_typedescr=>describe_by_data( is_outtab ).
+    lt_detail[] = lo_ref_descr->components.
+
+    LOOP AT lt_detail ASSIGNING <fs_detail>.
+      ASSIGN COMPONENT <fs_detail>-name OF STRUCTURE is_outtab TO <fs_outtab_comp>.
+      IF <fs_outtab_comp> IS ASSIGNED.
+        DATA(lref_typedescr) = cl_abap_typedescr=>describe_by_data( <fs_outtab_comp> ).
+        IF lref_typedescr->absolute_name+6 = 'LVC_T_SCOL'
+        OR lref_typedescr->absolute_name+6 = 'LVC_T_STYL'.
+          CONTINUE.
+        ENDIF.
+
+        DATA lref_elemdescr TYPE REF TO cl_abap_elemdescr.
+        lref_elemdescr ?= cl_abap_typedescr=>describe_by_data( <fs_outtab_comp> ).
+
+        APPEND VALUE lvc_s_fcat(
+          ref_field  = lref_typedescr->absolute_name+6
+          fieldname  = <fs_detail>-name
+          outputlen  = COND #( WHEN lref_typedescr->type_kind = 'P'
+                               THEN lref_elemdescr->output_length
+                               ELSE lref_typedescr->length )
+          decimals_o = lref_typedescr->decimals
+          inttype    = <fs_detail>-type_kind
+          datatype   = COND #(
+                        WHEN <fs_detail>-type_kind = 'D' THEN 'DATS'
+                        WHEN <fs_detail>-type_kind = 'T' THEN 'TIMS'
+                        WHEN <fs_detail>-type_kind = 'N' THEN 'NUMC'
+                        ELSE '' )
+          col_opt    = abap_true ) TO ct_fieldcat.
+      ENDIF.
+    ENDLOOP.
+
+    normalize_fieldcat(
+      EXPORTING iv_tabname   = lo_ref_descr->absolute_name+6(30)
+                it_custom_fc = it_custom_fc
+      CHANGING  ct_fieldcat  = ct_fieldcat ).
+  ENDMETHOD.
+
+
+  METHOD normalize_fieldcat.
+    FIELD-SYMBOLS <fs_fcat> TYPE lvc_s_fcat.
+
+    DATA lt_custom_fc TYPE tty_fc_custom.
+    lt_custom_fc = it_custom_fc.
+
+    LOOP AT lt_custom_fc ASSIGNING FIELD-SYMBOL(<ls_cust>).
+      TRANSLATE <ls_cust>-fieldname TO UPPER CASE.
+    ENDLOOP.
+
+    DATA lt_dd03t TYPE ty_ddic_cache-dd03t.
+    DATA lt_dd03l TYPE ty_ddic_cache-dd03l.
+    DATA lt_dd04t TYPE ty_ddic_cache-dd04t.
+    DATA lt_dd01l TYPE ty_ddic_cache-dd01l.
+
+    get_ddic_metadata(
+      EXPORTING iv_tabname = iv_tabname
+      IMPORTING et_dd03t   = lt_dd03t
+                et_dd03l   = lt_dd03l
+                et_dd04t   = lt_dd04t
+                et_dd01l   = lt_dd01l ).
+
+    DATA lv_counter TYPE i VALUE 0.
+
+    LOOP AT ct_fieldcat ASSIGNING <fs_fcat>.
+      READ TABLE lt_dd03t INTO DATA(ls03) WITH KEY fieldname = <fs_fcat>-fieldname.
+      IF sy-subrc = 0 AND ls03-ddtext IS NOT INITIAL.
+        IF <fs_fcat>-coltext   IS INITIAL. <fs_fcat>-coltext   = ls03-ddtext. ENDIF.
+        IF <fs_fcat>-scrtext_m IS INITIAL. <fs_fcat>-scrtext_m = ls03-ddtext. ENDIF.
+      ELSE.
+        READ TABLE lt_dd03l INTO DATA(ls03l) WITH KEY fieldname = <fs_fcat>-fieldname.
+        IF sy-subrc = 0.
+          READ TABLE lt_dd04t INTO DATA(ls04) WITH KEY rollname = ls03l-rollname.
+          IF sy-subrc = 0 AND ls04-scrtext_m IS NOT INITIAL.
+            IF <fs_fcat>-coltext   IS INITIAL. <fs_fcat>-coltext   = ls04-scrtext_m. ENDIF.
+            IF <fs_fcat>-scrtext_m IS INITIAL. <fs_fcat>-scrtext_m = ls04-scrtext_m. ENDIF.
+          ENDIF.
+          READ TABLE lt_dd01l INTO DATA(ls01) WITH KEY domname = ls03l-domname.
+          IF sy-subrc = 0 AND ls01-convexit IS NOT INITIAL.
+            <fs_fcat>-convexit = ls01-convexit.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+
+      LOOP AT lt_custom_fc ASSIGNING FIELD-SYMBOL(<fs_custom>)
+           WHERE fieldname = <fs_fcat>-fieldname OR fieldname = '*'.
+        ASSIGN COMPONENT <fs_custom>-fc_component OF STRUCTURE <fs_fcat>
+               TO FIELD-SYMBOL(<fs_comp>).
+        IF sy-subrc = 0.
+          <fs_comp> = <fs_custom>-value.
+        ENDIF.
+      ENDLOOP.
+
+      IF <fs_fcat>-col_id IS INITIAL.
+        lv_counter += 1.
+        <fs_fcat>-col_id  = lv_counter.
+        <fs_fcat>-col_pos = lv_counter.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD get_ddic_metadata.
+    READ TABLE gt_ddic_cache ASSIGNING FIELD-SYMBOL(<ls_cache>) WITH KEY tabname = iv_tabname.
+    IF sy-subrc = 0.
+      et_dd03t = <ls_cache>-dd03t.
+      et_dd03l = <ls_cache>-dd03l.
+      et_dd04t = <ls_cache>-dd04t.
+      et_dd01l = <ls_cache>-dd01l.
+      RETURN.
     ENDIF.
 
-    IF iv_charact_fc EQ abap_true.
-      gt_second_fcat = create_fc_from_charact( is_outtab = <fs_outtab_row> it_custom_fc = it_custom_fc ).
+    DATA ls_new TYPE ty_ddic_cache.
+    ls_new-tabname = iv_tabname.
+
+    SELECT fieldname, ddtext
+      FROM dd03t
+      WHERE tabname    = @iv_tabname
+        AND ddlanguage = @sy-langu
+        AND as4local   = 'A'
+      INTO TABLE @ls_new-dd03t.
+
+    SELECT fieldname, domname, rollname
+      FROM dd03l
+      WHERE tabname  = @iv_tabname
+        AND as4local = 'A'
+        AND as4vers  = ' '
+      INTO TABLE @ls_new-dd03l.
+
+    IF ls_new-dd03l IS NOT INITIAL.
+      SELECT rollname, scrtext_m
+        FROM dd04t
+        FOR ALL ENTRIES IN @ls_new-dd03l
+        WHERE rollname   = @ls_new-dd03l-rollname
+          AND ddlanguage = @sy-langu
+        INTO TABLE @ls_new-dd04t.
+
+      SELECT domname, convexit
+        FROM dd01l
+        FOR ALL ENTRIES IN @ls_new-dd03l
+        WHERE domname  = @ls_new-dd03l-domname
+          AND as4local = 'A'
+          AND as4vers  = ' '
+        INTO TABLE @ls_new-dd01l.
+    ENDIF.
+
+    INSERT ls_new INTO TABLE gt_ddic_cache ASSIGNING <ls_cache>.
+    et_dd03t = <ls_cache>-dd03t.
+    et_dd03l = <ls_cache>-dd03l.
+    et_dd04t = <ls_cache>-dd04t.
+    et_dd01l = <ls_cache>-dd01l.
+  ENDMETHOD.
+
+
+  METHOD set_handlers.
+    IF go_alv IS INITIAL.
+      RETURN.
+    ENDIF.
+    SET HANDLER me->handle_toolbar               FOR go_alv.
+    SET HANDLER me->handle_user_command          FOR go_alv.
+    SET HANDLER me->handle_hotspot_click         FOR go_alv.
+    SET HANDLER me->handle_double_click          FOR go_alv.
+    SET HANDLER me->handle_data_changed          FOR go_alv.
+    SET HANDLER me->handle_data_changed_finished FOR go_alv.
+    IF gt_f4 IS NOT INITIAL.
+      go_alv->register_f4_for_fields( it_f4 = gt_f4 ).
+      SET HANDLER me->handle_on_f4 FOR go_alv.
     ENDIF.
   ENDMETHOD.
 
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_ALV_MANAGER->UPDATE_TABLES
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] IT_TABLE_FT                    TYPE        DATA(optional)
-* | [--->] IT_TABLE_ST                    TYPE        DATA(optional)
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD update_tables.
-    IF it_table_ft IS NOT INITIAL.
-      gref_outtab = it_table_ft.
-
-      go_alv->refresh_table_display(
-        EXPORTING
-          is_stable      = VALUE lvc_s_stbl( row = 'X' col = 'X' )
-      ).
-
-    ENDIF.
-    IF it_table_st IS NOT INITIAL.
-      gref_second_outtab = it_table_st.
-      go_second_alv->refresh_table_display(
-        EXPORTING
-          is_stable      = VALUE lvc_s_stbl( row = 'X' col = 'X' )
-      ).
+  METHOD handle_toolbar.
+    IF mo_handler IS BOUND.
+      mo_handler->on_toolbar( e_object = e_object e_interactive = e_interactive ).
+    ELSE.
+      PERFORM handle_toolbar IN PROGRAM (gv_program_name) IF FOUND USING e_object e_interactive.
     ENDIF.
   ENDMETHOD.
+
+  METHOD handle_user_command.
+    DATA lt_rows TYPE lvc_t_row.
+    IF go_alv IS BOUND.
+      go_alv->get_selected_rows( IMPORTING et_index_rows = lt_rows ).
+    ENDIF.
+    IF mo_handler IS BOUND.
+      mo_handler->on_user_command( e_ucomm = e_ucomm it_rows = lt_rows ).
+    ELSE.
+      PERFORM handle_user_command IN PROGRAM (gv_program_name) IF FOUND USING e_ucomm lt_rows.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD handle_hotspot_click.
+    IF mo_handler IS BOUND.
+      mo_handler->on_hotspot_click( e_row_id = e_row_id e_column_id = e_column_id es_row_no = es_row_no ).
+    ELSE.
+      PERFORM handle_hotspot_click IN PROGRAM (gv_program_name) IF FOUND USING e_row_id e_column_id es_row_no.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD handle_double_click.
+    IF mo_handler IS BOUND.
+      mo_handler->on_double_click( e_row = e_row e_column = e_column ).
+    ELSE.
+      PERFORM handle_double_click IN PROGRAM (gv_program_name) IF FOUND USING e_row e_column.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD handle_data_changed.
+    IF mo_handler IS BOUND.
+      mo_handler->on_data_changed( er_data_changed = er_data_changed ).
+    ELSE.
+      PERFORM handle_data_changed IN PROGRAM (gv_program_name) IF FOUND USING er_data_changed.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD handle_on_f4.
+    IF mo_handler IS BOUND.
+      mo_handler->on_f4( e_fieldname = e_fieldname es_row_no = es_row_no er_event_data = er_event_data ).
+    ELSE.
+      PERFORM handle_on_f4 IN PROGRAM (gv_program_name) IF FOUND USING e_fieldname es_row_no er_event_data.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD handle_data_changed_finished.
+    IF mo_handler IS BOUND.
+      mo_handler->on_data_changed_finished( e_modified = e_modified et_good_cells = et_good_cells ).
+    ELSE.
+      PERFORM handle_data_changed_finished IN PROGRAM (gv_program_name) IF FOUND USING e_modified et_good_cells.
+    ENDIF.
+  ENDMETHOD.
+
 ENDCLASS.
