@@ -11,33 +11,33 @@ DATA: lo_functions TYPE REF TO cl_salv_functions_list,
       lref_layout_settings TYPE REF TO cl_salv_layout,
 
       ls_layout_key TYPE salv_s_layout_key.
-TRY.
-    cl_salv_table=>factory(
-        IMPORTING r_salv_table = lo_alv
-        CHANGING  t_table      = gt_outtab
-    ).
-
-    DATA(lt_comp) = CAST cl_abap_structdescr(
-        CAST cl_abap_tabledescr(
-          cl_abap_tabledescr=>describe_by_data( gt_outtab )
-        )->get_table_line_type( )
-    )->get_components( ).
-
-  CATCH cx_salv_msg.
-    "handle exception
-ENDTRY.
-
-" PF Status
-lo_functions = lo_alv->get_functions( ).
-lo_functions->set_all( abap_true ).
-
-lo_cols = lo_alv->get_columns( ).
-lo_cols->set_optimize( 'X' ).
-
-layout_settings = lo_alv->get_layout( ).
-
-layout_key-report = sy-repid.
-layout_settings->set_key( layout_key ).
-
-layout_settings->set_save_restriction( if_salv_c_layout=>restrict_none ).
+    TRY.
+        cl_salv_table=>factory(
+            IMPORTING r_salv_table = lo_alv
+            CHANGING  t_table      = lt_output
+        ).
+    
+        DATA(lt_comp) = CAST cl_abap_structdescr(
+            CAST cl_abap_tabledescr(
+              cl_abap_tabledescr=>describe_by_data( lt_output )
+            )->get_table_line_type( )
+        )->get_components( ).
+    
+      CATCH cx_salv_msg.
+        "handle exception
+    ENDTRY.
+    
+    " PF Status
+    lo_functions = lo_alv->get_functions( ).
+    lo_functions->set_all( abap_true ).
+    
+    lo_cols = lo_alv->get_columns( ).
+    lo_cols->set_optimize( 'X' ).
+    
+    lref_layout_settings = lo_alv->get_layout( ).
+    
+    ls_layout_key-report = sy-repid.
+    lref_layout_settings->set_key( ls_layout_key ).
+    
+    lref_layout_settings->set_save_restriction( if_salv_c_layout=>restrict_none ).
 ```
