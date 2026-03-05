@@ -40,4 +40,5 @@ DATA: lo_functions TYPE REF TO cl_salv_functions_list,
     lref_layout_settings->set_key( ls_layout_key ).
     
     lref_layout_settings->set_save_restriction( if_salv_c_layout=>restrict_none ).
+    lo_alv->display( ).
 ```
