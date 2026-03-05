@@ -4,7 +4,7 @@ CLASS zcl_alv_manager DEFINITION
   CREATE PRIVATE.
 
   PUBLIC SECTION.
-    TYPES ty_string_tab TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+    TYPES ty_ucomm_tab TYPE STANDARD TABLE OF sy-ucomm WITH EMPTY KEY.
     TYPES: BEGIN OF ty_fc_custom,
              fieldname    TYPE string,
              fc_component TYPE string,
@@ -32,7 +32,7 @@ CLASS zcl_alv_manager DEFINITION
     METHODS set_status_and_title
       IMPORTING iv_status          TYPE string OPTIONAL
                 iv_title           TYPE string OPTIONAL
-                it_fcode_excluding TYPE ty_string_tab OPTIONAL.
+                it_fcode_excluding TYPE ty_ucomm_tab OPTIONAL.
 
     " Core Actions
     METHODS display_data
@@ -62,6 +62,7 @@ CLASS zcl_alv_manager DEFINITION
     " State Persistence
     DATA mt_selected_rows         TYPE lvc_t_row.
     DATA ms_row_no                TYPE lvc_s_roid.
+    DATA ms_col_info              TYPE lvc_s_col.
 
     METHODS set_handlers.
     METHODS create_dyn_fc
@@ -145,10 +146,10 @@ CLASS zcl_alv_manager IMPLEMENTATION.
   METHOD refresh_with_state.
     CHECK mo_alv IS BOUND.
     mo_alv->get_selected_rows( IMPORTING et_index_rows = mt_selected_rows ).
-    mo_alv->get_scroll_info_via_id( IMPORTING es_row_no = ms_row_no ).
+    mo_alv->get_scroll_info_via_id( IMPORTING es_row_no = ms_row_no es_col_no = ms_col_info ).
     mo_alv->refresh_table_display( is_stable = VALUE #( row = 'X' col = 'X' ) i_soft_refresh = iv_soft_refresh ).
     mo_alv->set_selected_rows( it_index_rows = mt_selected_rows ).
-    mo_alv->set_scroll_info_via_id( is_row_no = ms_row_no ).
+    mo_alv->set_scroll_info_via_id( is_row_no = ms_row_no is_col_info = ms_col_info ).
   ENDMETHOD.
 
   METHOD set_status_and_title.
