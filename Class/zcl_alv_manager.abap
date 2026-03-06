@@ -102,7 +102,7 @@ CLASS zcl_alv_manager IMPLEMENTATION.
     mo_parent       = io_parent.
 
     ASSIGN mr_outtab->* TO <lt_out>.
-    DATA(lr_row) = NEW data.
+    DATA lr_row TYPE REF TO data.
     CREATE DATA lr_row LIKE LINE OF <lt_out>.
     ASSIGN lr_row->* TO FIELD-SYMBOL(<ls_row>).
 
@@ -146,7 +146,7 @@ CLASS zcl_alv_manager IMPLEMENTATION.
   METHOD refresh_with_state.
     CHECK mo_alv IS BOUND.
     mo_alv->get_selected_rows( IMPORTING et_index_rows = mt_selected_rows ).
-    mo_alv->get_scroll_info_via_id( IMPORTING es_row_no = ms_row_no es_col_no = ms_col_info ).
+    mo_alv->get_scroll_info_via_id( IMPORTING es_row_no = ms_row_no es_col_info = ms_col_info ).
     mo_alv->refresh_table_display( is_stable = VALUE #( row = 'X' col = 'X' ) i_soft_refresh = iv_soft_refresh ).
     mo_alv->set_selected_rows( it_index_rows = mt_selected_rows ).
     mo_alv->set_scroll_info_via_id( is_row_no = ms_row_no is_col_info = ms_col_info ).
@@ -175,7 +175,9 @@ CLASS zcl_alv_manager IMPLEMENTATION.
       APPEND VALUE lvc_s_fcat( fieldname = <ls_c>-name inttype = <ls_c>-type_kind 
                                intlen = <ls_c>-length decimals = <ls_c>-decimals col_opt = abap_true ) TO rt_fcat.
     ENDLOOP.
-    normalize_fieldcat( EXPORTING iv_tabname = lo_struct->absolute_name+6(30)
+    DATA lv_tabname TYPE string.
+    lv_tabname = lo_struct->absolute_name+6(30).
+    normalize_fieldcat( EXPORTING iv_tabname = lv_tabname
                                   it_custom_fc = it_custom_fc
                         CHANGING  ct_fieldcat = rt_fcat ).
   ENDMETHOD.
