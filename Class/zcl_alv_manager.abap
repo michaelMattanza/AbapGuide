@@ -48,6 +48,13 @@ CLASS zcl_alv_manager DEFINITION
       IMPORTING iv_soft_refresh TYPE abap_bool DEFAULT abap_false.
 
   PRIVATE SECTION.
+    TYPES: BEGIN OF ty_ddic_cache,
+             tabname TYPE tabname,
+             fcat    TYPE lvc_t_fcat,
+           END OF ty_ddic_cache.
+    CONSTANTS gc_fieldname_style TYPE fieldname VALUE 'T_STYL'.
+    CONSTANTS gc_fieldname_color TYPE fieldname VALUE 'T_SCOL'.
+
     CLASS-DATA go_instance        TYPE REF TO zcl_alv_manager.
 
     DATA mo_alv                   TYPE REF TO cl_gui_alv_grid.
@@ -58,6 +65,7 @@ CLASS zcl_alv_manager DEFINITION
     DATA mt_toolbar_excl          TYPE ui_functions.
     DATA mv_program_name          TYPE string.
     DATA mv_container_name        TYPE scrfname.
+    DATA gt_ddic_cache            TYPE HASHED TABLE OF ty_ddic_cache WITH UNIQUE KEY tabname.
     
     " State Persistence
     DATA mt_selected_rows         TYPE lvc_t_row.
@@ -68,6 +76,9 @@ CLASS zcl_alv_manager DEFINITION
     METHODS create_dyn_fc
       IMPORTING is_outtab    TYPE data
                 it_custom_fc TYPE tty_fc_custom OPTIONAL
+      RETURNING VALUE(rt_fcat) TYPE lvc_t_fcat.
+    METHODS get_ddic_metadata
+      IMPORTING iv_tabname TYPE tabname
       RETURNING VALUE(rt_fcat) TYPE lvc_t_fcat.
 
     METHODS normalize_fieldcat
@@ -169,17 +180,53 @@ CLASS zcl_alv_manager IMPLEMENTATION.
   METHOD create_dyn_fc.
     DATA(lo_struct) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_data( is_outtab ) ).
     DATA(lt_comp)   = lo_struct->components.
+    DATA lv_abs_name TYPE string.
+    DATA lv_tabname TYPE tabname.
 
-    LOOP AT lt_comp ASSIGNING FIELD-SYMBOL(<ls_c>).
-      IF <ls_c>-name = 'T_STYL' OR <ls_c>-name = 'T_SCOL'. CONTINUE. ENDIF.
-      APPEND VALUE lvc_s_fcat( fieldname = <ls_c>-name inttype = <ls_c>-type_kind 
-                               intlen = <ls_c>-length decimals = <ls_c>-decimals col_opt = abap_true ) TO rt_fcat.
-    ENDLOOP.
-    DATA lv_tabname TYPE string.
-    lv_tabname = lo_struct->absolute_name+6(30).
+    lv_abs_name = lo_struct->absolute_name.
+    IF lv_abs_name CP '\TYPE=*' AND strlen( lv_abs_name ) > 6 AND strlen( lv_abs_name ) <= 36.
+      lv_tabname = lv_abs_name+6.
+    ENDIF.
+    rt_fcat = get_ddic_metadata( lv_tabname ).
+
+    IF rt_fcat IS INITIAL.
+      LOOP AT lt_comp ASSIGNING FIELD-SYMBOL(<ls_c>).
+        IF <ls_c>-name = gc_fieldname_style OR <ls_c>-name = gc_fieldname_color. CONTINUE. ENDIF.
+        APPEND VALUE lvc_s_fcat( fieldname = <ls_c>-name inttype = <ls_c>-type_kind
+                                 intlen = <ls_c>-length decimals = <ls_c>-decimals col_opt = abap_true ) TO rt_fcat.
+      ENDLOOP.
+    ELSE.
+      DELETE rt_fcat WHERE fieldname = gc_fieldname_style OR fieldname = gc_fieldname_color.
+      LOOP AT rt_fcat ASSIGNING FIELD-SYMBOL(<ls_fcat>).
+        <ls_fcat>-col_opt = abap_true.
+      ENDLOOP.
+    ENDIF.
+
     normalize_fieldcat( EXPORTING iv_tabname = lv_tabname
-                                  it_custom_fc = it_custom_fc
-                        CHANGING  ct_fieldcat = rt_fcat ).
+                                   it_custom_fc = it_custom_fc
+                         CHANGING  ct_fieldcat = rt_fcat ).
+  ENDMETHOD.
+
+  METHOD get_ddic_metadata.
+    READ TABLE gt_ddic_cache ASSIGNING FIELD-SYMBOL(<ls_cache>) WITH TABLE KEY tabname = iv_tabname.
+    IF sy-subrc = 0.
+      rt_fcat = <ls_cache>-fcat.
+      RETURN.
+    ENDIF.
+
+    CHECK iv_tabname IS NOT INITIAL.
+    CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+      EXPORTING
+        i_structure_name = iv_tabname
+      CHANGING
+        ct_fieldcat      = rt_fcat
+      EXCEPTIONS
+        inconsistent_interface = 1
+        program_error          = 2
+        OTHERS                 = 3.
+    IF sy-subrc = 0 AND rt_fcat IS NOT INITIAL.
+      INSERT VALUE #( tabname = iv_tabname fcat = rt_fcat ) INTO TABLE gt_ddic_cache.
+    ENDIF.
   ENDMETHOD.
 
   METHOD normalize_fieldcat.
