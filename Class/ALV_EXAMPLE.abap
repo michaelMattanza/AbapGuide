@@ -38,11 +38,6 @@ START-OF-SELECTION.
   " 4. Optional: Hook the event logic
   lo_alv->set_event_handler( NEW lcl_events( ) ).
 
-  " 5. Display (The Manager creates the grid and handles the screen automatically)
-  lo_alv->display_data( ).
-
-  " 6. Enter the screen loop (Required to keep the GUI alive)
-  WRITE: / 'Loading...'. " This is just a fallback; in a real app, you'd use a Screen
   CALL SCREEN 0100.
 
 *--- Screen PBO
