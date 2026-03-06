@@ -52,6 +52,8 @@ CLASS zcl_alv_manager DEFINITION
              tabname TYPE tabname,
              fcat    TYPE lvc_t_fcat,
            END OF ty_ddic_cache.
+    CONSTANTS gc_fieldname_style TYPE fieldname VALUE 'T_STYL'.
+    CONSTANTS gc_fieldname_color TYPE fieldname VALUE 'T_SCOL'.
 
     CLASS-DATA go_instance        TYPE REF TO zcl_alv_manager.
 
@@ -178,19 +180,23 @@ CLASS zcl_alv_manager IMPLEMENTATION.
   METHOD create_dyn_fc.
     DATA(lo_struct) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_data( is_outtab ) ).
     DATA(lt_comp)   = lo_struct->components.
+    DATA lv_abs_name TYPE string.
     DATA lv_tabname TYPE tabname.
 
-    lv_tabname = lo_struct->absolute_name+6(30).
+    lv_abs_name = lo_struct->absolute_name.
+    IF lv_abs_name CP '\TYPE=*' AND strlen( lv_abs_name ) > 6 AND strlen( lv_abs_name ) <= 36.
+      lv_tabname = lv_abs_name+6.
+    ENDIF.
     rt_fcat = get_ddic_metadata( lv_tabname ).
 
     IF rt_fcat IS INITIAL.
       LOOP AT lt_comp ASSIGNING FIELD-SYMBOL(<ls_c>).
-        IF <ls_c>-name = 'T_STYL' OR <ls_c>-name = 'T_SCOL'. CONTINUE. ENDIF.
+        IF <ls_c>-name = gc_fieldname_style OR <ls_c>-name = gc_fieldname_color. CONTINUE. ENDIF.
         APPEND VALUE lvc_s_fcat( fieldname = <ls_c>-name inttype = <ls_c>-type_kind
                                  intlen = <ls_c>-length decimals = <ls_c>-decimals col_opt = abap_true ) TO rt_fcat.
       ENDLOOP.
     ELSE.
-      DELETE rt_fcat WHERE fieldname = 'T_STYL' OR fieldname = 'T_SCOL'.
+      DELETE rt_fcat WHERE fieldname = gc_fieldname_style OR fieldname = gc_fieldname_color.
       LOOP AT rt_fcat ASSIGNING FIELD-SYMBOL(<ls_fcat>).
         <ls_fcat>-col_opt = abap_true.
       ENDLOOP.
@@ -215,7 +221,9 @@ CLASS zcl_alv_manager IMPLEMENTATION.
       CHANGING
         ct_fieldcat      = rt_fcat
       EXCEPTIONS
-        OTHERS           = 1.
+        inconsistent_interface = 1
+        program_error          = 2
+        OTHERS                 = 3.
     IF sy-subrc = 0 AND rt_fcat IS NOT INITIAL.
       INSERT VALUE #( tabname = iv_tabname fcat = rt_fcat ) INTO TABLE gt_ddic_cache.
     ENDIF.
