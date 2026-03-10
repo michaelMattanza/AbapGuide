@@ -27,6 +27,8 @@ CLASS zcl_excel_manager DEFINITION
       CHANGING
         !cv_excel     TYPE xstring.
 
+     CLASS-METHODS create_excel_btp.
+
     CLASS-METHODS get_excel_from_al11
         IMPORTING
             !iv_file_path TYPE string
@@ -288,6 +290,15 @@ CLASS zcl_excel_manager IMPLEMENTATION.
     EXCEPTIONS
       OTHERS       = 1.
 
+  ENDMETHOD.
+
+  METHOD create_excel_btp.
+    
+DATA(lv_xcsv) =
+  cl_csv_factory=>new_writer( )
+    ->set_delimiter( ';' )
+    ->set_write_header( abap_true )
+    ->write( REF #( lt_data ) ).  " returns XSTRING
   ENDMETHOD.
 
 ENDCLASS.
