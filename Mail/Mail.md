@@ -2,7 +2,8 @@
 
 To generate an email in ABAP, which can then be viewed in **SOST**, you need to rely on standard classes. In this example, a PDF file is generated and then sent by email to a distribution list.
 
-```abap
+
+```abap     
 DATA:
   lo_send_request TYPE REF TO cl_bcs,
   lv_sender       TYPE REF TO cl_cam_address_bcs,
