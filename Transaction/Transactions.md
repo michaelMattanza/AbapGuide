@@ -164,6 +164,8 @@
 
 **SM04 / AL08:** Connected users / sessions
 
+**SM12:** Unlock entries
+
 **SM21:** System Log
 
 **SM30:** Enter single values in a dictionary table
