@@ -18,7 +18,9 @@ Then set the passing data by clicking on the "Data Flow" button, creating the va
 
 Create a method in the class that raises the workflow.
 
+    
 ```abap
+
   method RAISE_WKF.
     " WS 900000000
       CONSTANTS: lc_objtype TYPE sibftypeid VALUE '', " Class that contains the workflow event
@@ -60,3 +62,4 @@ Create a method in the class that raises the workflow.
     ENDTRY.
     COMMIT WORK.
   endmethod.
+```
